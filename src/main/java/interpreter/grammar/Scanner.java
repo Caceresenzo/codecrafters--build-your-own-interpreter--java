@@ -91,8 +91,10 @@ public class Scanner {
 			case '\n' -> ++line;
 			case '"' -> string();
 			default -> {
-				if (Character.isDigit(character)) {
+				if (isDigitCharacter(character)) {
 					number();
+				} else if (isIdentifierCharacter(character)) {
+					identifier();
 				} else {
 					error(line, "Unexpected character: %c".formatted(character));
 				}
@@ -123,21 +125,29 @@ public class Scanner {
 	}
 
 	private void number() {
-		while (Character.isDigit(peek())) {
+		while (isDigitCharacter(peek())) {
 			advance();
 		}
 
-		if (peek() == '.' && Character.isDigit(peek(1))) {
+		if (peek() == '.' && isDigitCharacter(peek(1))) {
 			// consume .
 			advance();
 
-			while (Character.isDigit(peek())) {
+			while (isDigitCharacter(peek())) {
 				advance();
 			}
 		}
 
 		final var value = Double.parseDouble(text());
 		addToken(TokenType.NUMBER, value);
+	}
+
+	private void identifier() {
+		while (isIdentifierCharacter(peek())) {
+			advance();
+		}
+
+		addToken(TokenType.IDENTIFIER);
 	}
 
 	private char peek() {
@@ -191,6 +201,14 @@ public class Scanner {
 
 	public boolean isAtEnd() {
 		return current >= source.length();
+	}
+
+	public boolean isDigitCharacter(char character) {
+		return Character.isDigit(character);
+	}
+
+	public boolean isIdentifierCharacter(char character) {
+		return character == '_' || Character.isAlphabetic(character) || isDigitCharacter(character);
 	}
 
 	private void error(int line, String message) {
