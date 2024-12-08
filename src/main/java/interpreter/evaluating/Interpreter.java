@@ -1,11 +1,10 @@
 package interpreter.evaluating;
 
 import interpreter.Lox;
-import interpreter.grammar.Literal;
 import interpreter.parser.Expression;
 import lombok.NonNull;
 
-public class Interpreter implements Expression.Visitor<Literal> {
+public class Interpreter implements Expression.Visitor<Value> {
 
 	private final Lox lox;
 
@@ -15,28 +14,28 @@ public class Interpreter implements Expression.Visitor<Literal> {
 		this.lox = lox;
 	}
 
-	public Literal evaluate(Expression expression) {
+	public Value evaluate(Expression expression) {
 		return visit(expression);
 	}
 
 	@Override
-	public Literal visitLiteral(Expression.Literal literal) {
-		return literal.value();
+	public Value visitLiteral(Expression.Literal literal) {
+		return literal.value().toValue();
 	}
 
 	@Override
-	public Literal visitGrouping(Expression.Grouping grouping) {
-		return null;
+	public Value visitGrouping(Expression.Grouping grouping) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Literal visitUnary(Expression.Unary unary) {
-		return null;
+	public Value visitUnary(Expression.Unary unary) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Literal visitBinary(Expression.Binary binary) {
-		return null;
+	public Value visitBinary(Expression.Binary binary) {
+		throw new UnsupportedOperationException();
 	}
 
 }
