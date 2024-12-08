@@ -9,6 +9,7 @@ public class AstPrinter implements Expression.Visitor<String> {
 		return switch (literal.value()) {
 			case Literal.Nil __ -> "nil";
 			case Literal.Boolean(final var value) -> Boolean.toString(value);
+			case Literal.Number(final var value) -> Double.toString(value);
 			default -> throw new UnsupportedOperationException();
 		};
 	}

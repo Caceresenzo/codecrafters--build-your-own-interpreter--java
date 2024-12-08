@@ -39,6 +39,10 @@ public class Parser {
 			return new Expression.Literal(new Literal.Nil());
 		}
 
+		if (match(TokenType.NUMBER)) {
+			return new Expression.Literal(previous().literal());
+		}
+
 		throw new UnsupportedOperationException();
 	}
 
