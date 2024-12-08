@@ -90,7 +90,13 @@ public class Scanner {
 			case ' ', '\r', '\t' -> {}
 			case '\n' -> ++line;
 			case '"' -> string();
-			default -> error(line, "Unexpected character: %c".formatted(character));
+			default -> {
+				if (Character.isDigit(character)) {
+					number();
+				} else {
+					error(line, "Unexpected character: %c".formatted(character));
+				}
+			}
 		}
 	}
 
@@ -116,12 +122,36 @@ public class Scanner {
 		addToken(TokenType.STRING, value);
 	}
 
+	private void number() {
+		while (Character.isDigit(peek())) {
+			advance();
+		}
+
+		if (peek() == '.' && Character.isDigit(peek(1))) {
+			// consume .
+			advance();
+
+			while (Character.isDigit(peek())) {
+				advance();
+			}
+		}
+
+		final var value = Double.parseDouble(text());
+		addToken(TokenType.NUMBER, value);
+	}
+
 	private char peek() {
-		if (isAtEnd()) {
+		return peek(0);
+	}
+
+	private char peek(int n) {
+		final var index = current + n;
+
+		if (index >= source.length()) {
 			return '\0';
 		}
 
-		return source.charAt(current);
+		return source.charAt(index);
 	}
 
 	private char advance() {
