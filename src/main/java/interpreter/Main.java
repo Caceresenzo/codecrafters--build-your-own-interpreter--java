@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import interpreter.evaluating.Interpreter;
 import interpreter.grammar.Scanner;
 import interpreter.parser.AstPrinter;
 import interpreter.parser.Parser;
@@ -27,6 +28,27 @@ public class Main {
 			return;
 		}
 
+		final var parser = new Parser(lox, tokens);
+		final var root = parser.parse();
+
+		if (lox.hadError()) {
+			return;
+		}
+
+		final var interpreter = new Interpreter(lox);
+		final var value = interpreter.evaluate(root.orElseThrow());
+
+		System.out.println(value.format());
+	}
+
+	public static void evaluate(Lox lox, String content) {
+		final var scanner = new Scanner(lox, content);
+		final var tokens = scanner.scanTokens();
+
+		if (lox.hadError()) {
+			return;
+		}
+
 		new Parser(lox, tokens)
 			.parse()
 			.map(new AstPrinter()::print)
@@ -39,12 +61,12 @@ public class Main {
 			System.exit(1);
 		}
 
-		String command = args[0];
-		String filePath = args[1];
+		final var command = args[0];
+		final var filePath = args[1];
 
-		String fileContents = "";
+		String content = "";
 		try {
-			fileContents = Files.readString(Path.of(filePath));
+			content = Files.readString(Path.of(filePath));
 		} catch (IOException e) {
 			System.err.println("Error reading file: " + e.getMessage());
 			System.exit(1);
@@ -53,8 +75,9 @@ public class Main {
 		final var lox = new Lox();
 
 		switch (command) {
-			case "tokenize" -> tokenize(lox, fileContents);
-			case "parse" -> parse(lox, fileContents);
+			case "tokenize" -> tokenize(lox, content);
+			case "parse" -> parse(lox, content);
+			case "evaluate" -> evaluate(lox, content);
 
 			default -> {
 				System.err.println("Unknown command: " + command);
