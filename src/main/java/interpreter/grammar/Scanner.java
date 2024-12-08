@@ -80,12 +80,33 @@ public class Scanner {
 					addToken(TokenType.GREATER);
 				}
 			}
+			case '/' -> {
+				if (this.match('/')) {
+					advanceNextLine();
+				} else {
+					addToken(TokenType.SLASH);
+				}
+			}
 			default -> error(line, "Unexpected character: %c".formatted(character));
 		}
 	}
 
+	private char peek() {
+		if (isAtEnd()) {
+			return '\0';
+		}
+
+		return source.charAt(current);
+	}
+
 	private char advance() {
 		return source.charAt(current++);
+	}
+
+	private void advanceNextLine() {
+		while (peek() != '\n' && !isAtEnd()) {
+			advance();
+		}
 	}
 
 	private boolean match(char expected) {
