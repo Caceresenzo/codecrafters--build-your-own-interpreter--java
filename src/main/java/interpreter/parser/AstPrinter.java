@@ -3,6 +3,7 @@ package interpreter.parser;
 import java.util.List;
 
 import interpreter.grammar.Literal;
+import interpreter.parser.Expression.Unary;
 
 public class AstPrinter implements Expression.Visitor<String> {
 
@@ -20,6 +21,11 @@ public class AstPrinter implements Expression.Visitor<String> {
 	@Override
 	public String visitGrouping(Expression.Grouping grouping) {
 		return parenthesize("group", List.of(grouping.expression()));
+	}
+
+	@Override
+	public String visitUnary(Unary unary) {
+		return parenthesize(unary.operator().lexeme(), List.of(unary.right()));
 	}
 
 	public String parenthesize(String name, List<Expression> expressions) {

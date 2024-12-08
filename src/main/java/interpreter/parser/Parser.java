@@ -23,6 +23,17 @@ public class Parser {
 	}
 
 	private Expression expression() {
+		return unary();
+	}
+
+	private Expression unary() {
+		if (match(TokenType.BANG, TokenType.MINUS)) {
+			final var operator = previous();
+			final var right = unary();
+
+			return new Expression.Unary(operator, right);
+		}
+
 		return primary();
 	}
 
