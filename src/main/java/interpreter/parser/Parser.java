@@ -23,7 +23,20 @@ public class Parser {
 	}
 
 	private Expression expression() {
-		return term();
+		return comparison();
+	}
+
+	private Expression comparison() {
+		var expression = term();
+
+		while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
+			final var operator = previous();
+			final var right = term();
+
+			expression = new Expression.Binary(expression, operator, right);
+		}
+
+		return expression;
 	}
 
 	private Expression term() {
@@ -100,8 +113,14 @@ public class Parser {
 		return false;
 	}
 
-	private boolean match(TokenType type1, TokenType type2) {
-		return match(type1) || match(type2);
+	private boolean match(TokenType... types) {
+		for (final var type : types) {
+			if (match(type)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private Token consume(TokenType type, String message) {
