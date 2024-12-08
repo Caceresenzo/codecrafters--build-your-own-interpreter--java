@@ -1,28 +1,38 @@
 package interpreter.parser;
 
 import java.util.List;
+import java.util.Optional;
 
+import interpreter.Lox;
 import interpreter.grammar.Literal;
 import interpreter.grammar.Token;
 import interpreter.grammar.TokenType;
+import lombok.NonNull;
 
 public class Parser {
 
+	private final Lox lox;
 	private final List<Token> tokens;
 
-	private int current;
+	private int current = 0;
 
-	public Parser(List<Token> tokens) {
+	public Parser(
+		@NonNull Lox lox,
+		@NonNull List<Token> tokens
+	) {
+		this.lox = lox;
 		this.tokens = tokens;
-
-		this.current = 0;
 	}
 
-	public Expression parse() {
-		return expression();
+	public Optional<Expression> parse() {
+		try {
+			return Optional.of(expression());
+		} catch (ParseException __) {
+			return Optional.empty();
+		}
 	}
 
-	private Expression expression() {
+	private @NonNull Expression expression() {
 		return equality();
 	}
 
@@ -114,7 +124,7 @@ public class Parser {
 			return new Expression.Grouping(expression);
 		}
 
-		throw new UnsupportedOperationException();
+		throw error(peek(), "Expect expression.");
 	}
 
 	private boolean match(TokenType type) {
@@ -173,8 +183,13 @@ public class Parser {
 	}
 
 	private ParseException error(Token token, String message) {
-		// TODO
-		throw new UnsupportedOperationException();
+		if (TokenType.EOF.equals(token.type())) {
+			lox.report(token.line(), " at end", message);
+		} else {
+			lox.report(token.line(), " at '%s'".formatted(token.lexeme()), message);
+		}
+
+		throw new ParseException(token, message);
 	}
 
 }

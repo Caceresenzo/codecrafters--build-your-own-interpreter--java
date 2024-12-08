@@ -10,6 +10,29 @@ import interpreter.parser.Parser;
 
 public class Main {
 
+	public static void tokenize(Lox lox, String content) {
+		final var scanner = new Scanner(lox, content);
+		final var tokens = scanner.scanTokens();
+
+		for (final var token : tokens) {
+			System.out.println(token.format());
+		}
+	}
+
+	public static void parse(Lox lox, String content) {
+		final var scanner = new Scanner(lox, content);
+		final var tokens = scanner.scanTokens();
+
+		if (lox.hadError()) {
+			return;
+		}
+
+		new Parser(lox, tokens)
+			.parse()
+			.map(new AstPrinter()::print)
+			.ifPresent(System.out::println);
+	}
+
 	public static void main(String[] args) {
 		if (args.length < 2) {
 			System.err.println("Usage: ./your_program.sh tokenize <filename>");
@@ -27,22 +50,11 @@ public class Main {
 			System.exit(1);
 		}
 
-		final var scanner = new Scanner(fileContents);
-		final var tokens = scanner.scanTokens();
+		final var lox = new Lox();
 
 		switch (command) {
-			case "tokenize" -> {
-				for (final var token : tokens) {
-					System.out.println(token.format());
-				}
-			}
-
-			case "parse" -> {
-				final var parser = new Parser(tokens);
-				final var root = parser.parse();
-
-				System.out.println(new AstPrinter().print(root));
-			}
+			case "tokenize" -> tokenize(lox, fileContents);
+			case "parse" -> parse(lox, fileContents);
 
 			default -> {
 				System.err.println("Unknown command: " + command);
@@ -50,7 +62,7 @@ public class Main {
 			}
 		}
 
-		if (scanner.hadError()) {
+		if (lox.hadError()) {
 			System.exit(65);
 		}
 	}

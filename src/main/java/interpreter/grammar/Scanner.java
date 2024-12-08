@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import interpreter.Lox;
+import lombok.NonNull;
+
 public class Scanner {
 
 	private static final Map<String, TokenType> KEYWORDS = Map.ofEntries(
@@ -25,24 +28,21 @@ public class Scanner {
 		Map.entry("while", TokenType.WHILE)
 	);
 
+	private final Lox lox;
 	private final String source;
 
-	private final List<Token> tokens;
+	private final List<Token> tokens = new ArrayList<>();
 
-	private int start;
-	private int current;
-	private int line;
+	private int start = 0;
+	private int current = 0;
+	private int line = 1;
 
-	private boolean hadError;
-
-	public Scanner(String source) {
+	public Scanner(
+		@NonNull Lox lox,
+		@NonNull String source
+	) {
+		this.lox = lox;
 		this.source = source;
-
-		this.tokens = new ArrayList<>();
-
-		this.start = 0;
-		this.current = 0;
-		this.line = 1;
 	}
 
 	public List<Token> scanTokens() {
@@ -233,17 +233,7 @@ public class Scanner {
 	}
 
 	private void error(int line, String message) {
-		report(line, "", message);
-	}
-
-	private void report(int line, String where, String message) {
-		hadError = true;
-
-		System.err.println("[line %d] Error%s: %s".formatted(line, where, message));
-	}
-
-	public boolean hadError() {
-		return hadError;
+		lox.report(line, "", message);
 	}
 
 }

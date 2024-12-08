@@ -1,7 +1,18 @@
 package interpreter.parser;
 
-import lombok.experimental.StandardException;
+import interpreter.grammar.Token;
+import lombok.Getter;
 
+@Getter
 @SuppressWarnings("serial")
-@StandardException
-public class ParseException extends RuntimeException {}
+public class ParseException extends RuntimeException {
+
+	private final Token token;
+
+	public ParseException(Token token, String message) {
+		super(message);
+
+		this.token = token;
+	}
+
+}
