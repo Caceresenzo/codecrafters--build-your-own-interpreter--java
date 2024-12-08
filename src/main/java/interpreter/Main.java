@@ -28,6 +28,20 @@ public class Main {
 			return;
 		}
 
+		new Parser(lox, tokens)
+			.parse()
+			.map(new AstPrinter()::print)
+			.ifPresent(System.out::println);
+	}
+
+	public static void evaluate(Lox lox, String content) {
+		final var scanner = new Scanner(lox, content);
+		final var tokens = scanner.scanTokens();
+
+		if (lox.hadError()) {
+			return;
+		}
+
 		final var parser = new Parser(lox, tokens);
 		final var root = parser.parse();
 
@@ -39,20 +53,6 @@ public class Main {
 		final var value = interpreter.evaluate(root.orElseThrow());
 
 		System.out.println(value.format());
-	}
-
-	public static void evaluate(Lox lox, String content) {
-		final var scanner = new Scanner(lox, content);
-		final var tokens = scanner.scanTokens();
-
-		if (lox.hadError()) {
-			return;
-		}
-
-		new Parser(lox, tokens)
-			.parse()
-			.map(new AstPrinter()::print)
-			.ifPresent(System.out::println);
 	}
 
 	public static void main(String[] args) {
