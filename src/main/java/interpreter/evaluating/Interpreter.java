@@ -26,17 +26,17 @@ public class Interpreter implements Expression.Visitor<Literal> {
 
 	@Override
 	public Literal visitGrouping(Expression.Grouping grouping) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Literal visitUnary(Expression.Unary unary) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Literal visitBinary(Expression.Binary binary) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 }
