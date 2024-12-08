@@ -89,8 +89,31 @@ public class Scanner {
 			}
 			case ' ', '\r', '\t' -> {}
 			case '\n' -> ++line;
+			case '"' -> string();
 			default -> error(line, "Unexpected character: %c".formatted(character));
 		}
+	}
+
+	private void string() {
+		char character;
+		while ((character = peek()) != '"' && !isAtEnd()) {
+			if (character == '\n') {
+				++line;
+			}
+
+			advance();
+		}
+
+		if (isAtEnd()) {
+			error(line, "Unterminated string.");
+			return;
+		}
+
+		// closing "
+		advance();
+
+		final var value = source.substring(start + 1, current - 1);
+		addToken(TokenType.STRING, value);
 	}
 
 	private char peek() {
