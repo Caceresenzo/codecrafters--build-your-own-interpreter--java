@@ -10,6 +10,7 @@ public class AstPrinter implements Expression.Visitor<String> {
 			case Literal.Nil __ -> "nil";
 			case Literal.Boolean(final var value) -> Boolean.toString(value);
 			case Literal.Number(final var value) -> Double.toString(value);
+			case Literal.String(final var value) -> value;
 			default -> throw new UnsupportedOperationException();
 		};
 	}

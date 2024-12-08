@@ -39,7 +39,7 @@ public class Parser {
 			return new Expression.Literal(new Literal.Nil());
 		}
 
-		if (match(TokenType.NUMBER)) {
+		if (match(TokenType.NUMBER, TokenType.STRING)) {
 			return new Expression.Literal(previous().literal());
 		}
 
@@ -53,6 +53,10 @@ public class Parser {
 		}
 
 		return false;
+	}
+
+	private boolean match(TokenType type1, TokenType type2) {
+		return match(type1) || match(type2);
 	}
 
 	private boolean check(TokenType type) {
