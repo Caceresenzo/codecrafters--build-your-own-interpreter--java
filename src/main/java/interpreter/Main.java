@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import interpreter.grammar.Scanner;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -28,10 +30,11 @@ public class Main {
 			System.exit(1);
 		}
 
-		if (fileContents.length() > 0) {
-			throw new RuntimeException("Scanner not implemented");
-		} else {
-			System.out.println("EOF  null");
+		final var scanner = new Scanner(fileContents);
+		final var tokens = scanner.scanTokens();
+
+		for (final var token : tokens) {
+			System.out.println(token.format());
 		}
 	}
 
