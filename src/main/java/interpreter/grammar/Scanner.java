@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import interpreter.parser.Literal;
+
 public class Scanner {
 
 	private static final Map<String, TokenType> KEYWORDS = Map.ofEntries(
@@ -53,7 +55,7 @@ public class Scanner {
 			scanToken();
 		}
 
-		tokens.add(new Token(TokenType.EOF, "", null, line));
+		tokens.add(new Token(TokenType.EOF, "", new Literal.Nil(), line));
 
 		return tokens;
 	}
@@ -141,7 +143,7 @@ public class Scanner {
 		advance();
 
 		final var value = source.substring(start + 1, current - 1);
-		addToken(TokenType.STRING, value);
+		addToken(TokenType.STRING, new Literal.String(value));
 	}
 
 	private void number() {
@@ -159,7 +161,7 @@ public class Scanner {
 		}
 
 		final var value = Double.parseDouble(text());
-		addToken(TokenType.NUMBER, value);
+		addToken(TokenType.NUMBER, new Literal.Number(value));
 	}
 
 	private void identifier() {
@@ -209,14 +211,14 @@ public class Scanner {
 	}
 
 	private void addToken(TokenType type) {
-		addToken(type, null);
+		addToken(type, new Literal.Nil());
 	}
 
 	private String text() {
 		return source.substring(start, current);
 	}
 
-	private void addToken(TokenType type, Object literal) {
+	private void addToken(TokenType type, Literal literal) {
 		tokens.add(new Token(type, text(), literal, line));
 	}
 
