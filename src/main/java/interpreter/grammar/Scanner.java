@@ -13,6 +13,8 @@ public class Scanner {
 	private int current;
 	private int line;
 
+	private boolean hadError;
+
 	public Scanner(String source) {
 		this.source = source;
 
@@ -50,6 +52,7 @@ public class Scanner {
 			case '+' -> addToken(TokenType.PLUS);
 			case ';' -> addToken(TokenType.SEMICOLON);
 			case '*' -> addToken(TokenType.STAR);
+			default -> error(line, "Unexpected character: %c".formatted(character));
 		}
 	}
 
@@ -61,14 +64,30 @@ public class Scanner {
 		addToken(type, null);
 	}
 
-	private void addToken(TokenType type, Object literal) {
-		final var text = source.substring(start, current);
+	private String text() {
+		return source.substring(start, current);
+	}
 
-		tokens.add(new Token(type, text, literal, line));
+	private void addToken(TokenType type, Object literal) {
+		tokens.add(new Token(type, text(), literal, line));
 	}
 
 	public boolean isAtEnd() {
 		return current >= source.length();
+	}
+
+	private void error(int line, String message) {
+		report(line, "", message);
+	}
+
+	private void report(int line, String where, String message) {
+		hadError = true;
+
+		System.err.println("[line %d] Error%s: %s".formatted(line, where, message));
+	}
+
+	public boolean hadError() {
+		return hadError;
 	}
 
 }

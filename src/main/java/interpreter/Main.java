@@ -36,6 +36,10 @@ public class Main {
 		for (final var token : tokens) {
 			System.out.println(token.format());
 		}
+
+		if (scanner.hadError()) {
+			System.exit(65);
+		}
 	}
 
 }
