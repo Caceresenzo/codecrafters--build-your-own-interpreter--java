@@ -42,6 +42,8 @@ public class Scanner {
 		switch (character) {
 			case '(' -> addToken(TokenType.LEFT_PAREN);
 			case ')' -> addToken(TokenType.RIGHT_PAREN);
+			case '{' -> addToken(TokenType.LEFT_BRACE);
+			case '}' -> addToken(TokenType.RIGHT_BRACE);
 		}
 	}
 
