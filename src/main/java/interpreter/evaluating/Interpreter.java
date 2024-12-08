@@ -25,7 +25,7 @@ public class Interpreter implements Expression.Visitor<Value> {
 
 	@Override
 	public Value visitGrouping(Expression.Grouping grouping) {
-		throw new UnsupportedOperationException();
+		return evaluate(grouping.expression());
 	}
 
 	@Override
