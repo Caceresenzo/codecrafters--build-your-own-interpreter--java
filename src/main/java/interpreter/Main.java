@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import interpreter.grammar.Scanner;
+import interpreter.parser.AstPrinter;
+import interpreter.parser.Parser;
 
 public class Main {
 
@@ -17,11 +19,6 @@ public class Main {
 		String command = args[0];
 		String filePath = args[1];
 
-		if (!command.equals("tokenize")) {
-			System.err.println("Unknown command: " + command);
-			System.exit(1);
-		}
-
 		String fileContents = "";
 		try {
 			fileContents = Files.readString(Path.of(filePath));
@@ -33,8 +30,24 @@ public class Main {
 		final var scanner = new Scanner(fileContents);
 		final var tokens = scanner.scanTokens();
 
-		for (final var token : tokens) {
-			System.out.println(token.format());
+		switch (command) {
+			case "tokenize" -> {
+				for (final var token : tokens) {
+					System.out.println(token.format());
+				}
+			}
+
+			case "parse" -> {
+				final var parser = new Parser(tokens);
+				final var root = parser.parse();
+
+				System.out.println(new AstPrinter().print(root));
+			}
+
+			default -> {
+				System.err.println("Unknown command: " + command);
+				System.exit(1);
+			}
 		}
 
 		if (scanner.hadError()) {
