@@ -66,6 +66,20 @@ public class Scanner {
 					addToken(TokenType.EQUAL);
 				}
 			}
+			case '<' -> {
+				if (this.match('=')) {
+					addToken(TokenType.LESS_EQUAL);
+				} else {
+					addToken(TokenType.LESS);
+				}
+			}
+			case '>' -> {
+				if (this.match('=')) {
+					addToken(TokenType.GREATER_EQUAL);
+				} else {
+					addToken(TokenType.GREATER);
+				}
+			}
 			default -> error(line, "Unexpected character: %c".formatted(character));
 		}
 	}
