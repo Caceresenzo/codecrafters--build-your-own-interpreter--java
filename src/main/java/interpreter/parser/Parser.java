@@ -23,7 +23,20 @@ public class Parser {
 	}
 
 	private Expression expression() {
-		return comparison();
+		return equality();
+	}
+
+	private Expression equality() {
+		var expression = comparison();
+
+		while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+			final var operator = previous();
+			final var right = comparison();
+
+			expression = new Expression.Binary(expression, operator, right);
+		}
+
+		return expression;
 	}
 
 	private Expression comparison() {
