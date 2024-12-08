@@ -43,6 +43,11 @@ public sealed interface Value {
 
 		@Override
 		public java.lang.String format() {
+			final var longValue = (long) value;
+			if (value == longValue) {
+				return Long.toString(longValue);
+			}
+
 			return Double.toString(value);
 		}
 
