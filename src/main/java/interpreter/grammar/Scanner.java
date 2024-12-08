@@ -87,6 +87,8 @@ public class Scanner {
 					addToken(TokenType.SLASH);
 				}
 			}
+			case ' ', '\r', '\t' -> {}
+			case '\n' -> ++line;
 			default -> error(line, "Unexpected character: %c".formatted(character));
 		}
 	}
