@@ -52,6 +52,13 @@ public class Scanner {
 			case '+' -> addToken(TokenType.PLUS);
 			case ';' -> addToken(TokenType.SEMICOLON);
 			case '*' -> addToken(TokenType.STAR);
+			case '!' -> {
+				if (this.match('=')) {
+					addToken(TokenType.BANG_EQUAL);
+				} else {
+					addToken(TokenType.BANG);
+				}
+			}
 			case '=' -> {
 				if (this.match('=')) {
 					addToken(TokenType.EQUAL_EQUAL);
