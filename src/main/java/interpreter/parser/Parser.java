@@ -39,8 +39,16 @@ public class Parser {
 			return new Expression.Literal(new Literal.Nil());
 		}
 
-		if (match(TokenType.NUMBER, TokenType.STRING)) {
+		if (match(TokenType.STRING, TokenType.NUMBER)) {
 			return new Expression.Literal(previous().literal());
+		}
+
+		if (match(TokenType.LEFT_PAREN)) {
+			final var expression = expression();
+
+			consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+
+			return new Expression.Grouping(expression);
 		}
 
 		throw new UnsupportedOperationException();
@@ -57,6 +65,14 @@ public class Parser {
 
 	private boolean match(TokenType type1, TokenType type2) {
 		return match(type1) || match(type2);
+	}
+
+	private Token consume(TokenType type, String message) {
+		if (check(type)) {
+			return advance();
+		}
+
+		throw error(peek(), message);
 	}
 
 	private boolean check(TokenType type) {
@@ -85,6 +101,11 @@ public class Parser {
 
 	private Token previous() {
 		return tokens.get(current - 1);
+	}
+
+	private ParseException error(Token token, String message) {
+		// TODO
+		throw new UnsupportedOperationException();
 	}
 
 }
