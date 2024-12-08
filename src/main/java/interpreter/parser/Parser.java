@@ -23,7 +23,20 @@ public class Parser {
 	}
 
 	private Expression expression() {
-		return unary();
+		return factor();
+	}
+
+	private Expression factor() {
+		var expression = unary();
+
+		while (match(TokenType.SLASH, TokenType.STAR)) {
+			final var operator = previous();
+			final var right = unary();
+
+			expression = new Expression.Binary(expression, operator, right);
+		}
+
+		return expression;
 	}
 
 	private Expression unary() {

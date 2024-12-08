@@ -18,6 +18,12 @@ public sealed interface Expression {
 		@NonNull Expression right
 	) implements Expression {}
 
+	public record Binary(
+		@NonNull Expression left,
+		@NonNull Token operator,
+		@NonNull Expression right
+	) implements Expression {}
+
 	public interface Visitor<T> {
 
 		T visitLiteral(Literal literal);
@@ -26,11 +32,14 @@ public sealed interface Expression {
 
 		T visitUnary(Unary unary);
 
+		T visitBinary(Binary binary);
+
 		default T visit(Expression expression) {
 			return switch (expression) {
-				case Expression.Literal literal -> visitLiteral(literal);
-				case Expression.Grouping grouping -> visitGrouping(grouping);
-				case Expression.Unary unary -> visitUnary(unary);
+				case Literal literal -> visitLiteral(literal);
+				case Grouping grouping -> visitGrouping(grouping);
+				case Unary unary -> visitUnary(unary);
+				case Binary binary -> visitBinary(binary);
 			};
 		}
 
