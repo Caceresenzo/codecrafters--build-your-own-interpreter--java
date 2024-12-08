@@ -52,12 +52,32 @@ public class Scanner {
 			case '+' -> addToken(TokenType.PLUS);
 			case ';' -> addToken(TokenType.SEMICOLON);
 			case '*' -> addToken(TokenType.STAR);
+			case '=' -> {
+				if (this.match('=')) {
+					addToken(TokenType.EQUAL_EQUAL);
+				} else {
+					addToken(TokenType.EQUAL);
+				}
+			}
 			default -> error(line, "Unexpected character: %c".formatted(character));
 		}
 	}
 
 	private char advance() {
 		return source.charAt(current++);
+	}
+
+	private boolean match(char expected) {
+		if (isAtEnd()) {
+			return false;
+		}
+
+		if (source.charAt(current) != expected) {
+			return false;
+		}
+
+		++current;
+		return true;
 	}
 
 	private void addToken(TokenType type) {
