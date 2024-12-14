@@ -54,6 +54,8 @@ public class Interpreter implements Expression.Visitor<Value> {
 		final var right = evaluate(binary.right());
 
 		return switch (binary.operator().type()) {
+			case MINUS -> applyNumberOperator(left, right, DoubleOperators::substract);
+			case PLUS -> applyNumberOperator(left, right, DoubleOperators::add);
 			case SLASH -> applyNumberOperator(left, right, DoubleOperators::divide);
 			case STAR -> applyNumberOperator(left, right, DoubleOperators::multiply);
 			default -> throw new UnsupportedOperationException();
