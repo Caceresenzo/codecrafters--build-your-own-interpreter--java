@@ -5,6 +5,7 @@ import java.util.function.DoubleBinaryOperator;
 import interpreter.Lox;
 import interpreter.parser.Expression;
 import interpreter.util.DoubleOperators;
+import interpreter.util.function.DoubleComparisonOperator;
 import lombok.NonNull;
 
 public class Interpreter implements Expression.Visitor<Value> {
@@ -68,6 +69,10 @@ public class Interpreter implements Expression.Visitor<Value> {
 			}
 			case SLASH -> applyNumberOperator(left, right, DoubleOperators::divide);
 			case STAR -> applyNumberOperator(left, right, DoubleOperators::multiply);
+			case GREATER -> applyNumberOperator(left, right, DoubleOperators::greaterThan);
+			case GREATER_EQUAL -> applyNumberOperator(left, right, DoubleOperators::greaterThanOrEqual);
+			case LESS -> applyNumberOperator(left, right, DoubleOperators::lessThan);
+			case LESS_EQUAL -> applyNumberOperator(left, right, DoubleOperators::lessThanOrEqual);
 			default -> throw new UnsupportedOperationException();
 		};
 	}
@@ -83,6 +88,14 @@ public class Interpreter implements Expression.Visitor<Value> {
 	private Value.Number applyNumberOperator(Value left, Value right, DoubleBinaryOperator operator) {
 		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
 			return new Value.Number(operator.applyAsDouble(leftValue, rightValue));
+		}
+
+		throw new UnsupportedOperationException();
+	}
+
+	private Value.Boolean applyNumberOperator(Value left, Value right, DoubleComparisonOperator operator) {
+		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
+			return new Value.Boolean(operator.applyAsDouble(leftValue, rightValue));
 		}
 
 		throw new UnsupportedOperationException();

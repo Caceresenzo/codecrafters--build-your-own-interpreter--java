@@ -21,4 +21,20 @@ public class DoubleOperators {
 		return a * b;
 	}
 
+	public static boolean greaterThan(double a, double b) {
+		return a > b;
+	}
+
+	public static boolean greaterThanOrEqual(double a, double b) {
+		return a >= b;
+	}
+
+	public static boolean lessThan(double a, double b) {
+		return a < b;
+	}
+
+	public static boolean lessThanOrEqual(double a, double b) {
+		return a <= b;
+	}
+
 }
