@@ -1,7 +1,10 @@
 package interpreter.evaluating;
 
+import java.util.function.DoubleBinaryOperator;
+
 import interpreter.Lox;
 import interpreter.parser.Expression;
+import interpreter.util.DoubleOperators;
 import lombok.NonNull;
 
 public class Interpreter implements Expression.Visitor<Value> {
@@ -47,7 +50,14 @@ public class Interpreter implements Expression.Visitor<Value> {
 
 	@Override
 	public Value visitBinary(Expression.Binary binary) {
-		throw new UnsupportedOperationException();
+		final var left = evaluate(binary.left());
+		final var right = evaluate(binary.right());
+
+		return switch (binary.operator().type()) {
+			case SLASH -> applyNumberOperator(left, right, DoubleOperators::divide);
+			case STAR -> applyNumberOperator(left, right, DoubleOperators::multiply);
+			default -> throw new UnsupportedOperationException();
+		};
 	}
 
 	public boolean isTruthy(Value value) {
@@ -56,6 +66,14 @@ public class Interpreter implements Expression.Visitor<Value> {
 			case Value.Boolean(final var rawValue) -> rawValue;
 			default -> true;
 		};
+	}
+
+	private Value.Number applyNumberOperator(Value left, Value right, DoubleBinaryOperator operator) {
+		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
+			return new Value.Number(operator.applyAsDouble(leftValue, rightValue));
+		}
+
+		throw new UnsupportedOperationException();
 	}
 
 }
