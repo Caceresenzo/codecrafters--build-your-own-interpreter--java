@@ -73,6 +73,8 @@ public class Interpreter implements Expression.Visitor<Value> {
 			case GREATER_EQUAL -> applyNumberOperator(left, right, DoubleOperators::greaterThanOrEqual);
 			case LESS -> applyNumberOperator(left, right, DoubleOperators::lessThan);
 			case LESS_EQUAL -> applyNumberOperator(left, right, DoubleOperators::lessThanOrEqual);
+			case BANG_EQUAL -> new Value.Boolean(!left.equals(right));
+			case EQUAL_EQUAL -> new Value.Boolean(left.equals(right));
 			default -> throw new UnsupportedOperationException();
 		};
 	}
