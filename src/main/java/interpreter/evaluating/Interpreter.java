@@ -76,7 +76,7 @@ public class Interpreter implements Expression.Visitor<Value> {
 					yield new Value.String(leftValue + rightValue);
 				}
 
-				throw new UnsupportedOperationException();
+				throw new RuntimeError("Operands must be two numbers or two strings.", operatorToken);
 			}
 			case SLASH -> applyNumberOperator(left, operatorToken, right, DoubleOperators::divide);
 			case STAR -> applyNumberOperator(left, operatorToken, right, DoubleOperators::multiply);
