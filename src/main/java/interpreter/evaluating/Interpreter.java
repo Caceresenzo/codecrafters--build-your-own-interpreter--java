@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
+import interpreter.evaluating.function.RuntimeFunction;
 import interpreter.evaluating.function.SimpleNativeFunction;
 import interpreter.grammar.Token;
 import interpreter.grammar.TokenType;
@@ -11,8 +12,6 @@ import interpreter.parser.Expression;
 import interpreter.parser.Expression.Call;
 import interpreter.parser.Expression.Logical;
 import interpreter.parser.Statement;
-import interpreter.parser.Statement.If;
-import interpreter.parser.Statement.While;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
 import lombok.NonNull;
@@ -106,7 +105,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Void visitIf(If if_) {
+	public Void visitIf(Statement.If if_) {
 		if (isTruthy(evaluate(if_.condition()))) {
 			execute(if_.thenBranch());
 		} else {
@@ -117,10 +116,19 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Void visitWhile(While while_) {
+	public Void visitWhile(Statement.While while_) {
 		while (isTruthy(evaluate(while_.condition()))) {
 			execute(while_.body());
 		}
+
+		return null;
+	}
+
+	@Override
+	public Void visitFunction(Statement.Function function) {
+		final var callable = new RuntimeFunction(function);
+
+		environment.defineFunction(callable);
 
 		return null;
 	}
@@ -256,6 +264,10 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		}
 
 		throw new RuntimeError("Operands must be numbers.", token);
+	}
+
+	public Environment environment() {
+		return environment;
 	}
 
 }

@@ -36,6 +36,12 @@ public sealed interface Statement {
 		@NonNull Statement body
 	) implements Statement {}
 
+	public record Function(
+		@NonNull Token name,
+		@NonNull List<Token> parameters,
+		@NonNull List<Statement> body
+	) implements Statement {}
+
 	public interface Visitor<T> {
 
 		T visitExpression(Expression expression);
@@ -50,6 +56,8 @@ public sealed interface Statement {
 
 		T visitWhile(While while_);
 
+		T visitFunction(Function function);
+
 		default T visit(Statement statement) {
 			return switch (statement) {
 				case Expression expression -> visitExpression(expression);
@@ -58,6 +66,7 @@ public sealed interface Statement {
 				case Block block -> visitBlock(block);
 				case If if_ -> visitIf(if_);
 				case While while_ -> visitWhile(while_);
+				case Function function -> visitFunction(function);
 			};
 		}
 

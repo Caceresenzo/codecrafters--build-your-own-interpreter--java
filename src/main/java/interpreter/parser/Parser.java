@@ -50,6 +50,10 @@ public class Parser {
 
 	private Statement declarationStatement() {
 		try {
+			if (match(TokenType.FUN)) {
+				return functionStatement("function");
+			}
+
 			if (match(TokenType.VAR)) {
 				return variableDeclarationStatement();
 			}
@@ -59,6 +63,30 @@ public class Parser {
 			synchronize();
 			throw error;
 		}
+	}
+
+	private Statement.Function functionStatement(String kind) {
+		final var name = consume(TokenType.IDENTIFIER, "Expect %s name.".formatted(kind));
+
+		consume(TokenType.LEFT_PAREN, "Expect '(' after %s name.".formatted(kind));
+
+		final var parameters = new ArrayList<Token>();
+		if (!check(TokenType.RIGHT_PAREN)) {
+			do {
+				if (parameters.size() >= 255) {
+					throw error(peek(), "Can't have more than 255 parameters.");
+				}
+
+				parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+			} while (match(TokenType.COMMA));
+		}
+
+		consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+		consume(TokenType.LEFT_BRACE, "Expect '{' before %s} body.".formatted(kind));
+
+		final var body = block();
+
+		return new Statement.Function(name, parameters, body);
 	}
 
 	private Statement.Variable variableDeclarationStatement() {
