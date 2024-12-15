@@ -18,6 +18,15 @@ public class Interpreter implements Expression.Visitor<Value> {
 		this.lox = lox;
 	}
 
+	public void interpret(Expression expression) {
+		try {
+			final var value = evaluate(expression);
+			System.out.println(value.format());
+		} catch (RuntimeError error) {
+			lox.reportRuntime(error.token().line(), error.getMessage());
+		}
+	}
+
 	public Value evaluate(Expression expression) {
 		return visit(expression);
 	}
@@ -43,7 +52,7 @@ public class Interpreter implements Expression.Visitor<Value> {
 					yield new Value.Number(-value);
 				}
 
-				throw new UnsupportedOperationException();
+				throw new RuntimeError("Operand must be a number.", unary.operator());
 			}
 			default -> throw new UnsupportedOperationException();
 		};

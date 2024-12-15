@@ -73,35 +73,35 @@ public class Scanner {
 			case ';' -> addToken(TokenType.SEMICOLON);
 			case '*' -> addToken(TokenType.STAR);
 			case '!' -> {
-				if (this.match('=')) {
+				if (match('=')) {
 					addToken(TokenType.BANG_EQUAL);
 				} else {
 					addToken(TokenType.BANG);
 				}
 			}
 			case '=' -> {
-				if (this.match('=')) {
+				if (match('=')) {
 					addToken(TokenType.EQUAL_EQUAL);
 				} else {
 					addToken(TokenType.EQUAL);
 				}
 			}
 			case '<' -> {
-				if (this.match('=')) {
+				if (match('=')) {
 					addToken(TokenType.LESS_EQUAL);
 				} else {
 					addToken(TokenType.LESS);
 				}
 			}
 			case '>' -> {
-				if (this.match('=')) {
+				if (match('=')) {
 					addToken(TokenType.GREATER_EQUAL);
 				} else {
 					addToken(TokenType.GREATER);
 				}
 			}
 			case '/' -> {
-				if (this.match('/')) {
+				if (match('/')) {
 					advanceNextLine();
 				} else {
 					addToken(TokenType.SLASH);

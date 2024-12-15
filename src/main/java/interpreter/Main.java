@@ -50,9 +50,7 @@ public class Main {
 		}
 
 		final var interpreter = new Interpreter(lox);
-		final var value = interpreter.evaluate(root.orElseThrow());
-
-		System.out.println(value.format());
+		interpreter.interpret(root.orElseThrow());
 	}
 
 	public static void main(String[] args) {
@@ -87,6 +85,8 @@ public class Main {
 
 		if (lox.hadError()) {
 			System.exit(65);
+		} else if (lox.hadRuntimeError()) {
+			System.exit(70);
 		}
 	}
 
