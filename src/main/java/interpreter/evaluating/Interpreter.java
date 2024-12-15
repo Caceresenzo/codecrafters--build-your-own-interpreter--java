@@ -5,7 +5,9 @@ import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
 import interpreter.grammar.Token;
+import interpreter.grammar.TokenType;
 import interpreter.parser.Expression;
+import interpreter.parser.Expression.Logical;
 import interpreter.parser.Statement;
 import interpreter.parser.Statement.If;
 import interpreter.util.DoubleOperators;
@@ -179,6 +181,23 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	@Override
 	public Value visitVariable(Expression.Variable variable) {
 		return environment.get(variable.name());
+	}
+
+	@Override
+	public Value visitLogical(Logical logical) {
+		final var left = evaluate(logical.left());
+
+		if (TokenType.OR.equals(logical.operator().type())) {
+			if (isTruthy(left)) {
+				return left;
+			}
+		} else {
+			if (!isTruthy(left)) {
+				return left;
+			}
+		}
+
+		return evaluate(logical.right());
 	}
 
 	public boolean isTruthy(Value value) {

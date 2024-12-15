@@ -138,7 +138,7 @@ public class Parser {
 	}
 
 	private Expression assignmentExpression() {
-		final var expression = equalityExpression();
+		final var expression = orExpression();
 
 		if (match(TokenType.EQUAL)) {
 			final var equals = previous();
@@ -149,6 +149,32 @@ public class Parser {
 			}
 
 			throw error(equals, "Invalid assignment target.");
+		}
+
+		return expression;
+	}
+
+	private Expression orExpression() {
+		var expression = andExpression();
+
+		while (match(TokenType.OR)) {
+			final var operator = previous();
+			final var right = andExpression();
+
+			expression = new Expression.Logical(expression, operator, right);
+		}
+
+		return expression;
+	}
+
+	private Expression andExpression() {
+		var expression = equalityExpression();
+
+		while (match(TokenType.AND)) {
+			final var operator = previous();
+			final var right = equalityExpression();
+
+			expression = new Expression.Logical(expression, operator, right);
 		}
 
 		return expression;

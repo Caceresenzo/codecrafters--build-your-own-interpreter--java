@@ -5,6 +5,7 @@ import java.util.List;
 import interpreter.grammar.Literal;
 import interpreter.parser.Expression.Assign;
 import interpreter.parser.Expression.Binary;
+import interpreter.parser.Expression.Logical;
 import interpreter.parser.Expression.Unary;
 import interpreter.parser.Expression.Variable;
 
@@ -43,6 +44,11 @@ public class AstPrinter implements Expression.Visitor<String> {
 
 	@Override
 	public String visitAssign(Assign assign) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String visitLogical(Logical logical) {
 		throw new UnsupportedOperationException();
 	}
 
