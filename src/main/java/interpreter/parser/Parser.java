@@ -79,6 +79,10 @@ public class Parser {
 			return printStatement();
 		}
 
+		if (match(TokenType.LEFT_BRACE)) {
+			return new Statement.Block(block());
+		}
+
 		return expressionStatement();
 	}
 
@@ -96,6 +100,18 @@ public class Parser {
 		consume(TokenType.SEMICOLON, "Expect ';' after expression.");
 
 		return new Statement.Expression(expression);
+	}
+
+	private List<Statement> block() {
+		final var statements = new ArrayList<Statement>();
+
+		while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+			statements.add(declarationStatement());
+		}
+
+		consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+
+		return statements;
 	}
 
 	private @NonNull Expression expression() {

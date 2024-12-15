@@ -43,6 +43,12 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		}
 	}
 
+	public void executeBlock(@NonNull List<Statement> statements) {
+		for (final var statement : statements) {
+			execute(statement);
+		}
+	}
+
 	public void execute(Statement statement) {
 		visit(statement);
 	}
@@ -73,6 +79,13 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			.orElseGet(Value.Nil::new);
 
 		environment.define(variable.name().lexeme(), value);
+
+		return null;
+	}
+
+	@Override
+	public Void visitBlock(Statement.Block block) {
+		executeBlock(block.statements());
 
 		return null;
 	}

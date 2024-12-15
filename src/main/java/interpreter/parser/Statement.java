@@ -1,5 +1,6 @@
 package interpreter.parser;
 
+import java.util.List;
 import java.util.Optional;
 
 import interpreter.grammar.Token;
@@ -20,6 +21,10 @@ public sealed interface Statement {
 		@NonNull Optional<interpreter.parser.Expression> initializer
 	) implements Statement {}
 
+	public record Block(
+		@NonNull List<Statement> statements
+	) implements Statement {}
+
 	public interface Visitor<T> {
 
 		T visitExpression(Expression expression);
@@ -28,11 +33,14 @@ public sealed interface Statement {
 
 		T visitVariable(Variable variable);
 
+		T visitBlock(Block block);
+
 		default T visit(Statement statement) {
 			return switch (statement) {
 				case Expression expression -> visitExpression(expression);
 				case Print print -> visitPrint(print);
 				case Variable variable -> visitVariable(variable);
+				case Block block -> visitBlock(block);
 			};
 		}
 
