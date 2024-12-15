@@ -80,10 +80,10 @@ public class Interpreter implements Expression.Visitor<Value> {
 			}
 			case SLASH -> applyNumberOperator(left, operatorToken, right, DoubleOperators::divide);
 			case STAR -> applyNumberOperator(left, operatorToken, right, DoubleOperators::multiply);
-			case GREATER -> applyNumberOperator(left, right, DoubleOperators::greaterThan);
-			case GREATER_EQUAL -> applyNumberOperator(left, right, DoubleOperators::greaterThanOrEqual);
-			case LESS -> applyNumberOperator(left, right, DoubleOperators::lessThan);
-			case LESS_EQUAL -> applyNumberOperator(left, right, DoubleOperators::lessThanOrEqual);
+			case GREATER -> applyNumberOperator(left, operatorToken, right, DoubleOperators::greaterThan);
+			case GREATER_EQUAL -> applyNumberOperator(left, operatorToken, right, DoubleOperators::greaterThanOrEqual);
+			case LESS -> applyNumberOperator(left, operatorToken, right, DoubleOperators::lessThan);
+			case LESS_EQUAL -> applyNumberOperator(left, operatorToken, right, DoubleOperators::lessThanOrEqual);
 			case BANG_EQUAL -> new Value.Boolean(!left.equals(right));
 			case EQUAL_EQUAL -> new Value.Boolean(left.equals(right));
 			default -> throw new UnsupportedOperationException();
@@ -106,12 +106,12 @@ public class Interpreter implements Expression.Visitor<Value> {
 		throw new RuntimeError("Operands must be numbers.", token);
 	}
 
-	private Value.Boolean applyNumberOperator(Value left, Value right, DoubleComparisonOperator operator) {
+	private Value.Boolean applyNumberOperator(Value left, Token token, Value right, DoubleComparisonOperator operator) {
 		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
 			return new Value.Boolean(operator.applyAsDouble(leftValue, rightValue));
 		}
 
-		throw new UnsupportedOperationException();
+		throw new RuntimeError("Operands must be numbers.", token);
 	}
 
 }
