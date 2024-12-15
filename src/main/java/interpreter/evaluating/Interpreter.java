@@ -10,6 +10,7 @@ import interpreter.parser.Expression;
 import interpreter.parser.Expression.Logical;
 import interpreter.parser.Statement;
 import interpreter.parser.Statement.If;
+import interpreter.parser.Statement.While;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
 import lombok.NonNull;
@@ -106,6 +107,15 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			execute(if_.thenBranch());
 		} else {
 			if_.elseBranch().ifPresent(this::execute);
+		}
+
+		return null;
+	}
+
+	@Override
+	public Void visitWhile(While while_) {
+		while (isTruthy(evaluate(while_.condition()))) {
+			execute(while_.body());
 		}
 
 		return null;

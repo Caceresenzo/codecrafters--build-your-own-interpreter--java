@@ -83,6 +83,10 @@ public class Parser {
 			return printStatement();
 		}
 
+		if (match(TokenType.WHILE)) {
+			return whileStatement();
+		}
+
 		if (match(TokenType.LEFT_BRACE)) {
 			return new Statement.Block(block());
 		}
@@ -92,9 +96,7 @@ public class Parser {
 
 	private Statement.If ifStatement() {
 		consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
-
 		final var condition = expression();
-
 		consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
 
 		final var thenBranch = statement();
@@ -111,6 +113,16 @@ public class Parser {
 		consume(TokenType.SEMICOLON, "Expect ';' after value.");
 
 		return new Statement.Print(value);
+	}
+
+	private Statement.While whileStatement() {
+		consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+		final var condition = expression();
+		consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition.");
+
+		final var body = statement();
+
+		return new Statement.While(condition, body);
 	}
 
 	private Statement.Expression expressionStatement() {

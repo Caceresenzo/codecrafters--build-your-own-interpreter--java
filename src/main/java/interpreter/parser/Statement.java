@@ -31,6 +31,11 @@ public sealed interface Statement {
 		@NonNull Optional<Statement> elseBranch
 	) implements Statement {}
 
+	public record While(
+		@NonNull interpreter.parser.Expression condition,
+		@NonNull Statement body
+	) implements Statement {}
+
 	public interface Visitor<T> {
 
 		T visitExpression(Expression expression);
@@ -43,6 +48,8 @@ public sealed interface Statement {
 
 		T visitIf(If if_);
 
+		T visitWhile(While while_);
+
 		default T visit(Statement statement) {
 			return switch (statement) {
 				case Expression expression -> visitExpression(expression);
@@ -50,6 +57,7 @@ public sealed interface Statement {
 				case Variable variable -> visitVariable(variable);
 				case Block block -> visitBlock(block);
 				case If if_ -> visitIf(if_);
+				case While while_ -> visitWhile(while_);
 			};
 		}
 
