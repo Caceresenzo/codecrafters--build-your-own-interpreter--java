@@ -3,6 +3,7 @@ package interpreter.evaluating;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
+import interpreter.grammar.Token;
 import interpreter.parser.Expression;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
@@ -63,8 +64,9 @@ public class Interpreter implements Expression.Visitor<Value> {
 		final var left = evaluate(binary.left());
 		final var right = evaluate(binary.right());
 
-		return switch (binary.operator().type()) {
-			case MINUS -> applyNumberOperator(left, right, DoubleOperators::substract);
+		final var operatorToken = binary.operator();
+		return switch (operatorToken.type()) {
+			case MINUS -> applyNumberOperator(left, operatorToken, right, DoubleOperators::substract);
 			case PLUS -> {
 				if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
 					yield new Value.Number(leftValue + rightValue);
@@ -76,8 +78,8 @@ public class Interpreter implements Expression.Visitor<Value> {
 
 				throw new UnsupportedOperationException();
 			}
-			case SLASH -> applyNumberOperator(left, right, DoubleOperators::divide);
-			case STAR -> applyNumberOperator(left, right, DoubleOperators::multiply);
+			case SLASH -> applyNumberOperator(left, operatorToken, right, DoubleOperators::divide);
+			case STAR -> applyNumberOperator(left, operatorToken, right, DoubleOperators::multiply);
 			case GREATER -> applyNumberOperator(left, right, DoubleOperators::greaterThan);
 			case GREATER_EQUAL -> applyNumberOperator(left, right, DoubleOperators::greaterThanOrEqual);
 			case LESS -> applyNumberOperator(left, right, DoubleOperators::lessThan);
@@ -96,12 +98,12 @@ public class Interpreter implements Expression.Visitor<Value> {
 		};
 	}
 
-	private Value.Number applyNumberOperator(Value left, Value right, DoubleBinaryOperator operator) {
+	private Value.Number applyNumberOperator(Value left, Token token, Value right, DoubleBinaryOperator operator) {
 		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
 			return new Value.Number(operator.applyAsDouble(leftValue, rightValue));
 		}
 
-		throw new UnsupportedOperationException();
+		throw new RuntimeError("Operands must be numbers.", token);
 	}
 
 	private Value.Boolean applyNumberOperator(Value left, Value right, DoubleComparisonOperator operator) {
