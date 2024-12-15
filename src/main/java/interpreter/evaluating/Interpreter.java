@@ -15,7 +15,7 @@ import lombok.NonNull;
 public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor<Void> {
 
 	private final Lox lox;
-	private final Environment environment;
+	private Environment environment;
 
 	public Interpreter(
 		@NonNull Lox lox
@@ -43,9 +43,17 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		}
 	}
 
-	public void executeBlock(@NonNull List<Statement> statements) {
-		for (final var statement : statements) {
-			execute(statement);
+	public void executeBlock(@NonNull List<Statement> statements, Environment environment) {
+		final var previous = this.environment;
+
+		try {
+			this.environment = environment;
+
+			for (final var statement : statements) {
+				execute(statement);
+			}
+		} finally {
+			this.environment = previous;
 		}
 	}
 
@@ -85,7 +93,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	@Override
 	public Void visitBlock(Statement.Block block) {
-		executeBlock(block.statements());
+		executeBlock(block.statements(), environment.inner());
 
 		return null;
 	}
