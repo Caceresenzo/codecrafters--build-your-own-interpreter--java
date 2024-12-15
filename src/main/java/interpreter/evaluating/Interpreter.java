@@ -127,7 +127,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	@Override
 	public Void visitFunction(Statement.Function function) {
-		final var callable = new RuntimeFunction(function);
+		final var callable = new RuntimeFunction(function, environment);
 
 		environment.defineFunction(callable);
 

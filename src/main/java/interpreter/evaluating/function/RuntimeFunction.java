@@ -2,13 +2,15 @@ package interpreter.evaluating.function;
 
 import java.util.List;
 
+import interpreter.evaluating.Environment;
 import interpreter.evaluating.Interpreter;
 import interpreter.evaluating.Value;
 import interpreter.parser.Statement;
 import interpreter.util.Iterators;
 
 public record RuntimeFunction(
-	Statement.Function declaration
+	Statement.Function declaration,
+	Environment closure
 ) implements Callable {
 
 	@Override
@@ -23,7 +25,7 @@ public record RuntimeFunction(
 
 	@Override
 	public Value call(Interpreter interpreter, List<Value> arguments) {
-		final var environment = interpreter.environment().inner();
+		final var environment = closure.inner();
 
 		Iterators.zip(
 			declaration.parameters().iterator(),
