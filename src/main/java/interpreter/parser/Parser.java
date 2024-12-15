@@ -299,7 +299,35 @@ public class Parser {
 			return new Expression.Unary(operator, right);
 		}
 
-		return primaryExpression();
+		return callExpression();
+	}
+
+	private Expression callExpression() {
+		var expression = primaryExpression();
+
+		while (match(TokenType.LEFT_PAREN)) {
+			expression = finishCallExpression(expression);
+		}
+
+		return expression;
+	}
+
+	private Expression.Call finishCallExpression(Expression callee) {
+		final var arguments = new ArrayList<Expression>();
+
+		if (!check(TokenType.RIGHT_PAREN)) {
+			do {
+				if (arguments.size() >= 255) {
+					throw error(peek(), "Can't have more than 255 arguments.");
+				}
+
+				arguments.add(expression());
+			} while (match(TokenType.COMMA));
+		}
+
+		final var parenthesis = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+
+		return new Expression.Call(callee, parenthesis, arguments);
 	}
 
 	private Expression primaryExpression() {

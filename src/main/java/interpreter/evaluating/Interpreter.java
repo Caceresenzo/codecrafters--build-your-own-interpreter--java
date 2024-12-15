@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
+import interpreter.evaluating.function.SimpleNativeFunction;
 import interpreter.grammar.Token;
 import interpreter.grammar.TokenType;
 import interpreter.parser.Expression;
+import interpreter.parser.Expression.Call;
 import interpreter.parser.Expression.Logical;
 import interpreter.parser.Statement;
 import interpreter.parser.Statement.If;
@@ -18,13 +20,15 @@ import lombok.NonNull;
 public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor<Void> {
 
 	private final Lox lox;
-	private Environment environment;
+	private final Environment globals = new Environment();
+	private Environment environment = globals;
 
 	public Interpreter(
 		@NonNull Lox lox
 	) {
 		this.lox = lox;
-		this.environment = new Environment();
+
+		this.globals.defineFunction(new SimpleNativeFunction("clock", 0, (__) -> new Value.Number(System.currentTimeMillis() / 1000)));
 	}
 
 	public void interpret(List<Statement> statements) {
@@ -208,6 +212,26 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		}
 
 		return evaluate(logical.right());
+	}
+
+	@Override
+	public Value visitCall(Call call) {
+		final var callee = evaluate(call.callee());
+
+		final var arguments = call.arguments()
+			.stream()
+			.map(this::evaluate)
+			.toList();
+
+		if (!(callee instanceof Value.Function(final var callable))) {
+			throw new RuntimeError("Can only call functions and classes.", call.parenthesis());
+		}
+
+		if (callable.arity() != arguments.size()) {
+			throw new RuntimeError("Expected %d arguments but got %s.".formatted(callable.arity(), arguments.size()), call.parenthesis());
+		}
+
+		return callable.call(this, arguments);
 	}
 
 	public boolean isTruthy(Value value) {

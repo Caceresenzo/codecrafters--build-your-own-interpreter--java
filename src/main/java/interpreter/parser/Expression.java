@@ -1,5 +1,7 @@
 package interpreter.parser;
 
+import java.util.List;
+
 import interpreter.grammar.Token;
 import lombok.NonNull;
 
@@ -39,6 +41,12 @@ public sealed interface Expression {
 		@NonNull Expression right
 	) implements Expression {}
 
+	public record Call(
+		@NonNull Expression callee,
+		@NonNull Token parenthesis,
+		@NonNull List<Expression> arguments
+	) implements Expression {}
+
 	public interface Visitor<T> {
 
 		T visitLiteral(Literal literal);
@@ -55,6 +63,8 @@ public sealed interface Expression {
 
 		T visitLogical(Logical logical);
 
+		T visitCall(Call call);
+
 		default T visit(Expression expression) {
 			return switch (expression) {
 				case Literal literal -> visitLiteral(literal);
@@ -64,6 +74,7 @@ public sealed interface Expression {
 				case Variable variable -> visitVariable(variable);
 				case Assign assign -> visitAssign(assign);
 				case Logical logical -> visitLogical(logical);
+				case Call call -> visitCall(call);
 			};
 		}
 

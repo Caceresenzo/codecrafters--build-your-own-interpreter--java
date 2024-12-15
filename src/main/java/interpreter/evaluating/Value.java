@@ -1,6 +1,8 @@
 package interpreter.evaluating;
 
+import interpreter.evaluating.function.Callable;
 import lombok.NonNull;
+import lombok.experimental.Delegate;
 
 public sealed interface Value {
 
@@ -49,6 +51,17 @@ public sealed interface Value {
 			}
 
 			return Double.toString(value);
+		}
+
+	}
+
+	public record Function(
+		@Delegate Callable callable
+	) implements Value {
+
+		@Override
+		public java.lang.String format() {
+			return callable.format();
 		}
 
 	}

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import interpreter.evaluating.function.Callable;
 import interpreter.grammar.Token;
 import lombok.NonNull;
 
@@ -18,6 +19,10 @@ public class Environment {
 
 	public Environment(@NonNull Environment enclosing) {
 		this.enclosing = Optional.of(enclosing);
+	}
+
+	public void defineFunction(Callable callable) {
+		define(callable.name(), new Value.Function(callable));
 	}
 
 	public void define(String name, Value value) {
