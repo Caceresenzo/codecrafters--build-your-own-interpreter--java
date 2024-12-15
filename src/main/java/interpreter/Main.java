@@ -29,7 +29,7 @@ public class Main {
 		}
 
 		new Parser(lox, tokens)
-			.parse()
+			.parseExpression()
 			.map(new AstPrinter()::print)
 			.ifPresent(System.out::println);
 	}
@@ -43,7 +43,7 @@ public class Main {
 		}
 
 		final var parser = new Parser(lox, tokens);
-		final var root = parser.parse();
+		final var root = parser.parseExpression();
 
 		if (lox.hadError()) {
 			return;
@@ -51,6 +51,25 @@ public class Main {
 
 		final var interpreter = new Interpreter(lox);
 		interpreter.interpret(root.orElseThrow());
+	}
+
+	public static void run(Lox lox, String content) {
+		final var scanner = new Scanner(lox, content);
+		final var tokens = scanner.scanTokens();
+
+		if (lox.hadError()) {
+			return;
+		}
+
+		final var parser = new Parser(lox, tokens);
+		final var statements = parser.parse();
+
+		if (lox.hadError()) {
+			return;
+		}
+
+		final var interpreter = new Interpreter(lox);
+		interpreter.interpret(statements);
 	}
 
 	public static void main(String[] args) {
@@ -76,6 +95,7 @@ public class Main {
 			case "tokenize" -> tokenize(lox, content);
 			case "parse" -> parse(lox, content);
 			case "evaluate" -> evaluate(lox, content);
+			case "run" -> run(lox, content);
 
 			default -> {
 				System.err.println("Unknown command: " + command);

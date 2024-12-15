@@ -1,5 +1,7 @@
 package interpreter.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +26,21 @@ public class Parser {
 		this.tokens = tokens;
 	}
 
-	public Optional<Expression> parse() {
+	public List<Statement> parse() {
+		try {
+			final var statements = new ArrayList<Statement>();
+
+			while (!isAtEnd()) {
+				statements.add(statement());
+			}
+
+			return statements;
+		} catch (ParseException __) {
+			return Collections.emptyList();
+		}
+	}
+
+	public Optional<Expression> parseExpression() {
 		try {
 			return Optional.of(expression());
 		} catch (ParseException __) {
@@ -32,16 +48,40 @@ public class Parser {
 		}
 	}
 
-	private @NonNull Expression expression() {
-		return equality();
+	private @NonNull Statement statement() {
+		if (match(TokenType.PRINT)) {
+			return printStatement();
+		}
+
+		return expressionStatement();
 	}
 
-	private Expression equality() {
-		var expression = comparison();
+	private Statement.Print printStatement() {
+		final var value = expression();
+
+		consume(TokenType.SEMICOLON, "Expect ';' after value.");
+
+		return new Statement.Print(value);
+	}
+
+	private Statement.Expression expressionStatement() {
+		final var expression = expression();
+
+		consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+
+		return new Statement.Expression(expression);
+	}
+
+	private @NonNull Expression expression() {
+		return equalityExpression();
+	}
+
+	private Expression equalityExpression() {
+		var expression = comparisonExpression();
 
 		while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
 			final var operator = previous();
-			final var right = comparison();
+			final var right = comparisonExpression();
 
 			expression = new Expression.Binary(expression, operator, right);
 		}
@@ -49,12 +89,12 @@ public class Parser {
 		return expression;
 	}
 
-	private Expression comparison() {
-		var expression = term();
+	private Expression comparisonExpression() {
+		var expression = termExpression();
 
 		while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
 			final var operator = previous();
-			final var right = term();
+			final var right = termExpression();
 
 			expression = new Expression.Binary(expression, operator, right);
 		}
@@ -62,12 +102,12 @@ public class Parser {
 		return expression;
 	}
 
-	private Expression term() {
-		var expression = factor();
+	private Expression termExpression() {
+		var expression = factorExpression();
 
 		while (match(TokenType.MINUS, TokenType.PLUS)) {
 			final var operator = previous();
-			final var right = factor();
+			final var right = factorExpression();
 
 			expression = new Expression.Binary(expression, operator, right);
 		}
@@ -75,12 +115,12 @@ public class Parser {
 		return expression;
 	}
 
-	private Expression factor() {
-		var expression = unary();
+	private Expression factorExpression() {
+		var expression = unaryExpression();
 
 		while (match(TokenType.SLASH, TokenType.STAR)) {
 			final var operator = previous();
-			final var right = unary();
+			final var right = unaryExpression();
 
 			expression = new Expression.Binary(expression, operator, right);
 		}
@@ -88,18 +128,18 @@ public class Parser {
 		return expression;
 	}
 
-	private Expression unary() {
+	private Expression unaryExpression() {
 		if (match(TokenType.BANG, TokenType.MINUS)) {
 			final var operator = previous();
-			final var right = unary();
+			final var right = unaryExpression();
 
 			return new Expression.Unary(operator, right);
 		}
 
-		return primary();
+		return primaryExpression();
 	}
 
-	private Expression primary() {
+	private Expression primaryExpression() {
 		if (match(TokenType.FALSE)) {
 			return new Expression.Literal(new Literal.Boolean(false));
 		}

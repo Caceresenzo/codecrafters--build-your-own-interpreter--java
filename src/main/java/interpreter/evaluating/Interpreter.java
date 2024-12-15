@@ -1,15 +1,17 @@
 package interpreter.evaluating;
 
+import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
 import interpreter.grammar.Token;
 import interpreter.parser.Expression;
+import interpreter.parser.Statement;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
 import lombok.NonNull;
 
-public class Interpreter implements Expression.Visitor<Value> {
+public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor<Void> {
 
 	private final Lox lox;
 
@@ -17,6 +19,16 @@ public class Interpreter implements Expression.Visitor<Value> {
 		@NonNull Lox lox
 	) {
 		this.lox = lox;
+	}
+
+	public void interpret(List<Statement> statements) {
+		try {
+			for (final var statement : statements) {
+				execute(statement);
+			}
+		} catch (RuntimeError error) {
+			lox.reportRuntime(error.token().line(), error.getMessage());
+		}
 	}
 
 	public void interpret(Expression expression) {
@@ -28,8 +40,27 @@ public class Interpreter implements Expression.Visitor<Value> {
 		}
 	}
 
+	public void execute(Statement statement) {
+		visit(statement);
+	}
+
 	public Value evaluate(Expression expression) {
 		return visit(expression);
+	}
+
+	@Override
+	public Void visitExpression(Statement.Expression expression) {
+		evaluate(expression.expression());
+
+		return null;
+	}
+
+	@Override
+	public Void visitPrint(Statement.Print print) {
+		final var value = evaluate(print.expression());
+		System.out.println(value.format());
+
+		return null;
 	}
 
 	@Override
