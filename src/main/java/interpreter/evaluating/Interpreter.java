@@ -6,8 +6,8 @@ import java.util.function.DoubleBinaryOperator;
 import interpreter.Lox;
 import interpreter.grammar.Token;
 import interpreter.parser.Expression;
-import interpreter.parser.Expression.Assign;
 import interpreter.parser.Statement;
+import interpreter.parser.Statement.If;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
 import lombok.NonNull;
@@ -99,12 +99,14 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitAssign(Assign assign) {
-		final var value = evaluate(assign.value());
+	public Void visitIf(If if_) {
+		if (isTruthy(evaluate(if_.condition()))) {
+			execute(if_.thenBranch());
+		} else {
+			if_.elseBranch().ifPresent(this::execute);
+		}
 
-		environment.assign(assign.name(), value);
-
-		return value;
+		return null;
 	}
 
 	@Override
@@ -163,6 +165,15 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			case EQUAL_EQUAL -> new Value.Boolean(left.equals(right));
 			default -> throw new UnsupportedOperationException();
 		};
+	}
+
+	@Override
+	public Value visitAssign(Expression.Assign assign) {
+		final var value = evaluate(assign.value());
+
+		environment.assign(assign.name(), value);
+
+		return value;
 	}
 
 	@Override

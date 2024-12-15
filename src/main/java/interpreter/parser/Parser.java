@@ -75,6 +75,10 @@ public class Parser {
 	}
 
 	private @NonNull Statement statement() {
+		if (match(TokenType.IF)) {
+			return ifStatement();
+		}
+
 		if (match(TokenType.PRINT)) {
 			return printStatement();
 		}
@@ -84,6 +88,21 @@ public class Parser {
 		}
 
 		return expressionStatement();
+	}
+
+	private Statement.If ifStatement() {
+		consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+
+		final var condition = expression();
+
+		consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+		final var thenBranch = statement();
+		final var elseBranch = match(TokenType.ELSE)
+			? Optional.of(statement())
+			: Optional.<Statement>empty();
+
+		return new Statement.If(condition, thenBranch, elseBranch);
 	}
 
 	private Statement.Print printStatement() {

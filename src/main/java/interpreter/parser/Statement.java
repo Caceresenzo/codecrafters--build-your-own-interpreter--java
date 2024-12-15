@@ -25,6 +25,12 @@ public sealed interface Statement {
 		@NonNull List<Statement> statements
 	) implements Statement {}
 
+	public record If(
+		@NonNull interpreter.parser.Expression condition,
+		@NonNull Statement thenBranch,
+		@NonNull Optional<Statement> elseBranch
+	) implements Statement {}
+
 	public interface Visitor<T> {
 
 		T visitExpression(Expression expression);
@@ -35,12 +41,15 @@ public sealed interface Statement {
 
 		T visitBlock(Block block);
 
+		T visitIf(If if_);
+
 		default T visit(Statement statement) {
 			return switch (statement) {
 				case Expression expression -> visitExpression(expression);
 				case Print print -> visitPrint(print);
 				case Variable variable -> visitVariable(variable);
 				case Block block -> visitBlock(block);
+				case If if_ -> visitIf(if_);
 			};
 		}
 
