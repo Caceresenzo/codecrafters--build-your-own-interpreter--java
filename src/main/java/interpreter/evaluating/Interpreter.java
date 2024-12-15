@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
+import interpreter.evaluating.function.Return;
 import interpreter.evaluating.function.RuntimeFunction;
 import interpreter.evaluating.function.SimpleNativeFunction;
 import interpreter.grammar.Token;
@@ -240,6 +241,15 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		}
 
 		return callable.call(this, arguments);
+	}
+
+	@Override
+	public Void visitReturn(Statement.Return return_) {
+		final var value = return_.value()
+			.map(this::evaluate)
+			.orElseGet(Value.Nil::new);
+
+		throw new Return(value);
 	}
 
 	public boolean isTruthy(Value value) {

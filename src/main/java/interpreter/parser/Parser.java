@@ -115,6 +115,10 @@ public class Parser {
 			return printStatement();
 		}
 
+		if (match(TokenType.RETURN)) {
+			return returnStatement();
+		}
+
 		if (match(TokenType.WHILE)) {
 			return whileStatement();
 		}
@@ -188,6 +192,18 @@ public class Parser {
 		consume(TokenType.SEMICOLON, "Expect ';' after value.");
 
 		return new Statement.Print(value);
+	}
+
+	private Statement.Return returnStatement() {
+		final var keyword = previous();
+
+		final var value = !check(TokenType.SEMICOLON)
+			? Optional.of(expression())
+			: Optional.<Expression>empty();
+
+		consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+
+		return new Statement.Return(keyword, value);
 	}
 
 	private Statement.While whileStatement() {

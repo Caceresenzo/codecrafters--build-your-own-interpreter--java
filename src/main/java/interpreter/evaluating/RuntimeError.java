@@ -13,6 +13,12 @@ public class RuntimeError extends RuntimeException {
 		this.token = token;
 	}
 
+	protected RuntimeError(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+
+		this.token = null;
+	}
+
 	public Token token() {
 		return token;
 	}

@@ -31,8 +31,13 @@ public record RuntimeFunction(
 			(parameter, argument) -> environment.define(parameter.lexeme(), argument)
 		);
 
-		interpreter.executeBlock(declaration.body(), environment);
-		return null;
+		try {
+			interpreter.executeBlock(declaration.body(), environment);
+
+			return new Value.Nil();
+		} catch (Return return_) {
+			return return_.value();
+		}
 	}
 
 	@Override
