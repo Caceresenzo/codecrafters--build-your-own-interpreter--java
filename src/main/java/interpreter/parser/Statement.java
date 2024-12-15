@@ -1,13 +1,23 @@
 package interpreter.parser;
 
+import java.util.Optional;
+
+import interpreter.grammar.Token;
+import lombok.NonNull;
+
 public sealed interface Statement {
 
 	public record Expression(
-		interpreter.parser.Expression expression
+		@NonNull interpreter.parser.Expression expression
 	) implements Statement {}
 
 	public record Print(
-		interpreter.parser.Expression expression
+		@NonNull interpreter.parser.Expression expression
+	) implements Statement {}
+
+	public record Variable(
+		@NonNull Token name,
+		@NonNull Optional<interpreter.parser.Expression> initializer
 	) implements Statement {}
 
 	public interface Visitor<T> {
@@ -16,10 +26,13 @@ public sealed interface Statement {
 
 		T visitPrint(Print print);
 
+		T visitVariable(Variable variable);
+
 		default T visit(Statement statement) {
 			return switch (statement) {
 				case Expression expression -> visitExpression(expression);
 				case Print print -> visitPrint(print);
+				case Variable variable -> visitVariable(variable);
 			};
 		}
 

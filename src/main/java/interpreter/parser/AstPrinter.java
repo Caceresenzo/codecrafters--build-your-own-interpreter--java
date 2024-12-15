@@ -5,6 +5,7 @@ import java.util.List;
 import interpreter.grammar.Literal;
 import interpreter.parser.Expression.Binary;
 import interpreter.parser.Expression.Unary;
+import interpreter.parser.Expression.Variable;
 
 public class AstPrinter implements Expression.Visitor<String> {
 
@@ -32,6 +33,11 @@ public class AstPrinter implements Expression.Visitor<String> {
 	@Override
 	public String visitBinary(Binary binary) {
 		return parenthesize(binary.operator().lexeme(), List.of(binary.left(), binary.right()));
+	}
+
+	@Override
+	public String visitVariable(Variable variable) {
+		throw new UnsupportedOperationException();
 	}
 
 	public String parenthesize(String name, List<Expression> expressions) {

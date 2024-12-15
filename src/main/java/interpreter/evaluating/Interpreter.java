@@ -14,11 +14,13 @@ import lombok.NonNull;
 public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor<Void> {
 
 	private final Lox lox;
+	private final Environment environment;
 
 	public Interpreter(
 		@NonNull Lox lox
 	) {
 		this.lox = lox;
+		this.environment = new Environment();
 	}
 
 	public void interpret(List<Statement> statements) {
@@ -59,6 +61,17 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitPrint(Statement.Print print) {
 		final var value = evaluate(print.expression());
 		System.out.println(value.format());
+
+		return null;
+	}
+
+	@Override
+	public Void visitVariable(Statement.Variable variable) {
+		final var value = variable.initializer()
+			.map(this::evaluate)
+			.orElseGet(Value.Nil::new);
+
+		environment.define(variable.name().lexeme(), value);
 
 		return null;
 	}
@@ -119,6 +132,11 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			case EQUAL_EQUAL -> new Value.Boolean(left.equals(right));
 			default -> throw new UnsupportedOperationException();
 		};
+	}
+
+	@Override
+	public Value visitVariable(Expression.Variable variable) {
+		return environment.get(variable.token());
 	}
 
 	public boolean isTruthy(Value value) {

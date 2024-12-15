@@ -31,11 +31,11 @@ public class Parser {
 			final var statements = new ArrayList<Statement>();
 
 			while (!isAtEnd()) {
-				statements.add(statement());
+				statements.add(declarationStatement());
 			}
 
 			return statements;
-		} catch (ParseException __) {
+		} catch (ParseError __) {
 			return Collections.emptyList();
 		}
 	}
@@ -43,9 +43,35 @@ public class Parser {
 	public Optional<Expression> parseExpression() {
 		try {
 			return Optional.of(expression());
-		} catch (ParseException __) {
+		} catch (ParseError __) {
 			return Optional.empty();
 		}
+	}
+
+	private Statement declarationStatement() {
+		try {
+			if (match(TokenType.VAR)) {
+				return variableDeclarationStatement();
+			}
+
+			return statement();
+		} catch (ParseError error) {
+			synchronize();
+			throw error;
+		}
+	}
+
+	private Statement.Variable variableDeclarationStatement() {
+		final var name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+		var initializer = Optional.<Expression>empty();
+		if (match(TokenType.EQUAL)) {
+			initializer = Optional.of(expression());
+		}
+
+		consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+
+		return new Statement.Variable(name, initializer);
 	}
 
 	private @NonNull Statement statement() {
@@ -152,6 +178,10 @@ public class Parser {
 			return new Expression.Literal(new Literal.Nil());
 		}
 
+		if (match(TokenType.IDENTIFIER)) {
+			return new Expression.Variable(previous());
+		}
+
 		if (match(TokenType.STRING, TokenType.NUMBER)) {
 			return new Expression.Literal(previous().literal());
 		}
@@ -222,14 +252,41 @@ public class Parser {
 		return tokens.get(current - 1);
 	}
 
-	private ParseException error(Token token, String message) {
+	private ParseError error(Token token, String message) {
 		if (TokenType.EOF.equals(token.type())) {
 			lox.report(token.line(), " at end", message);
 		} else {
 			lox.report(token.line(), " at '%s'".formatted(token.lexeme()), message);
 		}
 
-		throw new ParseException(token, message);
+		throw new ParseError(token, message);
+	}
+
+	private void synchronize() {
+		advance();
+
+		while (!isAtEnd()) {
+			if (previous().type() == TokenType.SEMICOLON) {
+				return;
+			}
+
+			switch (peek().type()) {
+				case CLASS:
+				case FUN:
+				case VAR:
+				case FOR:
+				case IF:
+				case WHILE:
+				case PRINT:
+				case RETURN: {
+					return;
+				}
+
+				default: {}
+			}
+
+			advance();
+		}
 	}
 
 }
