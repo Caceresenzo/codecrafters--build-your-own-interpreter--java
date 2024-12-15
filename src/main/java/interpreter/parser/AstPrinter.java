@@ -3,6 +3,7 @@ package interpreter.parser;
 import java.util.List;
 
 import interpreter.grammar.Literal;
+import interpreter.parser.Expression.Assign;
 import interpreter.parser.Expression.Binary;
 import interpreter.parser.Expression.Unary;
 import interpreter.parser.Expression.Variable;
@@ -37,6 +38,11 @@ public class AstPrinter implements Expression.Visitor<String> {
 
 	@Override
 	public String visitVariable(Variable variable) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String visitAssign(Assign assign) {
 		throw new UnsupportedOperationException();
 	}
 

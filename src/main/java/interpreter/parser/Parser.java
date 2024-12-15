@@ -99,7 +99,24 @@ public class Parser {
 	}
 
 	private @NonNull Expression expression() {
-		return equalityExpression();
+		return assignmentExpression();
+	}
+
+	private Expression assignmentExpression() {
+		final var expression = equalityExpression();
+
+		if (match(TokenType.EQUAL)) {
+			final var equals = previous();
+			final var value = assignmentExpression();
+
+			if (expression instanceof Expression.Variable(final var name)) {
+				return new Expression.Assign(name, value);
+			}
+
+			throw error(equals, "Invalid assignment target.");
+		}
+
+		return expression;
 	}
 
 	private Expression equalityExpression() {

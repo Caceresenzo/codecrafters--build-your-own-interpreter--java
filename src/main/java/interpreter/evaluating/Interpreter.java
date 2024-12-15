@@ -6,6 +6,7 @@ import java.util.function.DoubleBinaryOperator;
 import interpreter.Lox;
 import interpreter.grammar.Token;
 import interpreter.parser.Expression;
+import interpreter.parser.Expression.Assign;
 import interpreter.parser.Statement;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
@@ -77,6 +78,15 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
+	public Value visitAssign(Assign assign) {
+		final var value = evaluate(assign.value());
+
+		environment.assign(assign.name(), value);
+
+		return value;
+	}
+
+	@Override
 	public Value visitLiteral(Expression.Literal literal) {
 		return literal.value().toValue();
 	}
@@ -136,7 +146,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	@Override
 	public Value visitVariable(Expression.Variable variable) {
-		return environment.get(variable.token());
+		return environment.get(variable.name());
 	}
 
 	public boolean isTruthy(Value value) {

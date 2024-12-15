@@ -25,7 +25,12 @@ public sealed interface Expression {
 	) implements Expression {}
 
 	public record Variable(
-		@NonNull Token token
+		@NonNull Token name
+	) implements Expression {}
+
+	public record Assign(
+		@NonNull Token name,
+		@NonNull Expression value
 	) implements Expression {}
 
 	public interface Visitor<T> {
@@ -39,6 +44,8 @@ public sealed interface Expression {
 		T visitBinary(Binary binary);
 
 		T visitVariable(Variable variable);
+		
+		T visitAssign(Assign assign);
 
 		default T visit(Expression expression) {
 			return switch (expression) {
@@ -47,6 +54,7 @@ public sealed interface Expression {
 				case Unary unary -> visitUnary(unary);
 				case Binary binary -> visitBinary(binary);
 				case Variable variable -> visitVariable(variable);
+				case Assign assign -> visitAssign(assign);
 			};
 		}
 

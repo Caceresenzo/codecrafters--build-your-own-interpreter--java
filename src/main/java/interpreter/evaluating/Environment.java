@@ -24,4 +24,13 @@ public class Environment {
 		return value;
 	}
 
+	public void assign(Token name, Value value) {
+		final var lexeme = name.lexeme();
+
+		final var previous = values.replace(lexeme, value);
+		if (previous == null) {
+			throw new RuntimeError("Undefined variable '%s'.".formatted(lexeme), name);
+		}
+	}
+
 }
