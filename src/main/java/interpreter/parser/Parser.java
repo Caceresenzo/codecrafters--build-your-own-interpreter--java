@@ -75,6 +75,10 @@ public class Parser {
 	}
 
 	private @NonNull Statement statement() {
+		if (match(TokenType.FOR)) {
+			return forStatement();
+		}
+
 		if (match(TokenType.IF)) {
 			return ifStatement();
 		}
@@ -92,6 +96,49 @@ public class Parser {
 		}
 
 		return expressionStatement();
+	}
+
+	private Statement forStatement() {
+		consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+
+		Optional<Statement> initializer;
+		if (match(TokenType.SEMICOLON)) {
+			initializer = Optional.empty();
+		} else if (match(TokenType.VAR)) {
+			initializer = Optional.of(variableDeclarationStatement());
+		} else {
+			initializer = Optional.of(expressionStatement());
+		}
+
+		final var condition = !check(TokenType.SEMICOLON)
+			? expression()
+			: new Expression.Literal(new Literal.Boolean(true));
+
+		consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+		final var increment = !check(TokenType.RIGHT_PAREN)
+			? Optional.of(expression())
+			: Optional.<Expression>empty();
+
+		consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+		var body = statement();
+		if (increment.isPresent()) {
+			body = new Statement.Block(List.of(
+				body,
+				new Statement.Expression(increment.get())
+			));
+		}
+
+		body = new Statement.While(condition, body);
+		if (initializer.isPresent()) {
+			body = new Statement.Block(List.of(
+				initializer.get(),
+				body
+			));
+		}
+
+		return body;
 	}
 
 	private Statement.If ifStatement() {
