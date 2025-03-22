@@ -1,6 +1,8 @@
 package interpreter.evaluating;
 
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
@@ -21,6 +23,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	private final Lox lox;
 	private final Environment globals = new Environment();
+	private final Map<Expression, Integer> locals = new IdentityHashMap<>();
 	private Environment environment = globals;
 
 	public Interpreter(
@@ -196,14 +199,19 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Value visitAssign(Expression.Assign assign) {
 		final var value = evaluate(assign.value());
 
-		environment.assign(assign.name(), value);
+		final var distance = locals.get(assign);
+		if (distance != null) {
+			environment.assignAt(distance, assign.name(), value);
+		} else {
+			globals.assign(assign.name(), value);
+		}
 
 		return value;
 	}
 
 	@Override
 	public Value visitVariable(Expression.Variable variable) {
-		return environment.get(variable.name());
+		return lookUpVariable(variable.name(), variable);
 	}
 
 	@Override
@@ -252,6 +260,20 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		throw new Return(value);
 	}
 
+	public void resolve(Expression expression, int depth) {
+		locals.put(expression, depth);
+	}
+
+	public Value lookUpVariable(Token name, Expression expression) {
+		final var distance = locals.get(expression);
+
+		if (distance != null) {
+			return environment.getAt(distance, name.lexeme());
+		}
+
+		return globals.get(name);
+	}
+
 	public boolean isTruthy(Value value) {
 		return switch (value) {
 			case Value.Nil __ -> false;
@@ -274,6 +296,10 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		}
 
 		throw new RuntimeError("Operands must be numbers.", token);
+	}
+
+	public Lox lox() {
+		return lox;
 	}
 
 	public Environment environment() {
