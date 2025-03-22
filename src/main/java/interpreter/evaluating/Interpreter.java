@@ -14,6 +14,7 @@ import interpreter.grammar.TokenType;
 import interpreter.parser.Expression;
 import interpreter.parser.Expression.Call;
 import interpreter.parser.Expression.Logical;
+import interpreter.parser.Expression.Set;
 import interpreter.parser.Statement;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
@@ -268,6 +269,30 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		environment.assign(class_.name(), new Value.Function(klass));
 
 		return null;
+	}
+
+	@Override
+	public Value visitGet(Expression.Get get) {
+		final var object = evaluate(get.object());
+
+		if (object instanceof Instance instance) {
+			return instance.get(get.name());
+		}
+
+		throw new RuntimeError("Only instances have properties.", get.name());
+	}
+	
+	@Override
+	public Value visitSet(Set set) {
+		final var object = evaluate(set.object());
+		if (!(object instanceof Instance instance)) {
+			throw new RuntimeError("Only instances have fields.", set.name());
+		}
+		
+		final var value = evaluate(set.value());
+		instance.set(set.name(), value);
+		
+		return value;
 	}
 
 	public void resolve(Expression expression, int depth) {

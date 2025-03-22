@@ -8,12 +8,7 @@ import java.util.Stack;
 import interpreter.Lox;
 import interpreter.grammar.Token;
 import interpreter.parser.Expression;
-import interpreter.parser.Expression.Grouping;
-import interpreter.parser.Expression.Literal;
-import interpreter.parser.Expression.Logical;
-import interpreter.parser.Expression.Unary;
 import interpreter.parser.Statement;
-import interpreter.parser.Statement.Class;
 import lombok.NonNull;
 
 public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Void> {
@@ -208,19 +203,19 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 	}
 
 	@Override
-	public Void visitGrouping(Grouping grouping) {
+	public Void visitGrouping(Expression.Grouping grouping) {
 		resolve(grouping.expression());
 
 		return null;
 	}
 
 	@Override
-	public Void visitLiteral(Literal literal) {
+	public Void visitLiteral(Expression.Literal literal) {
 		return null;
 	}
 
 	@Override
-	public Void visitLogical(Logical logical) {
+	public Void visitLogical(Expression.Logical logical) {
 		resolve(logical.left());
 		resolve(logical.right());
 
@@ -228,16 +223,31 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 	}
 
 	@Override
-	public Void visitUnary(Unary unary) {
+	public Void visitUnary(Expression.Unary unary) {
 		resolve(unary.right());
 
 		return null;
 	}
 
 	@Override
-	public Void visitClass(Class class_) {
+	public Void visitClass(Statement.Class class_) {
 		declare(class_.name());
 		define(class_.name());
+
+		return null;
+	}
+
+	@Override
+	public Void visitGet(Expression.Get get) {
+		resolve(get.object());
+
+		return null;
+	}
+
+	@Override
+	public Void visitSet(Expression.Set set) {
+		resolve(set.value());
+		resolve(set.object());
 
 		return null;
 	}
