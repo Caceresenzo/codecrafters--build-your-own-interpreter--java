@@ -13,6 +13,7 @@ import interpreter.parser.Expression.Literal;
 import interpreter.parser.Expression.Logical;
 import interpreter.parser.Expression.Unary;
 import interpreter.parser.Statement;
+import interpreter.parser.Statement.Class;
 import lombok.NonNull;
 
 public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Void> {
@@ -229,6 +230,14 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 	@Override
 	public Void visitUnary(Unary unary) {
 		resolve(unary.right());
+
+		return null;
+	}
+
+	@Override
+	public Void visitClass(Class class_) {
+		declare(class_.name());
+		define(class_.name());
 
 		return null;
 	}

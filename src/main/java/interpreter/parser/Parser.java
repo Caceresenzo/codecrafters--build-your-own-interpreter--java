@@ -50,6 +50,10 @@ public class Parser {
 
 	private Statement declarationStatement() {
 		try {
+			if (match(TokenType.CLASS)) {
+				return classDeclarationStatement();
+			}
+
 			if (match(TokenType.FUN)) {
 				return functionStatement("function");
 			}
@@ -63,6 +67,20 @@ public class Parser {
 			synchronize();
 			throw error;
 		}
+	}
+
+	private Statement.Class classDeclarationStatement() {
+		final var name = consume(TokenType.IDENTIFIER, "Expect class name.");
+		consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+		final var methods = new ArrayList<Statement.Function>();
+		while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+			methods.add(functionStatement("method"));
+		}
+
+		consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+		return new Statement.Class(name, methods);
 	}
 
 	private Statement.Function functionStatement(String kind) {
