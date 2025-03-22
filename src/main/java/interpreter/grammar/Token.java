@@ -6,11 +6,15 @@ public record Token(
 	@NonNull TokenType type,
 	@NonNull String lexeme,
 	@NonNull Literal literal,
-	int line
+	Location location
 ) {
 
 	public String format() {
 		return "%s %s %s".formatted(type, lexeme, literal.format());
+	}
+	
+	public int line() {
+		return location.line();
 	}
 
 }
