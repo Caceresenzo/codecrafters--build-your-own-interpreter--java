@@ -13,11 +13,14 @@ import interpreter.parser.Expression.Literal;
 import interpreter.parser.Expression.Logical;
 import interpreter.parser.Expression.Unary;
 import interpreter.parser.Statement;
+import lombok.NonNull;
 
 public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Void> {
 
 	private final Interpreter interpreter;
 	private final Lox lox;
+
+	private @NonNull FunctionType currentFunctionType = FunctionType.NONE;
 
 	private final Stack<Map<String, Boolean>> scopes = new Stack<>();
 
@@ -77,7 +80,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		}
 	}
 
-	private void resolveFunction(Statement.Function function) {
+	private void resolveFunction(Statement.Function function, FunctionType type) {
+		final var enclosingType = currentFunctionType;
+		currentFunctionType = type;
+
 		beginScope();
 
 		for (final var parameter : function.parameters()) {
@@ -88,6 +94,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		resolve(function.body());
 
 		endScope();
+
+		currentFunctionType = enclosingType;
 	}
 
 	@Override
@@ -132,7 +140,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		declare(function.name());
 		define(function.name());
 
-		resolveFunction(function);
+		resolveFunction(function, FunctionType.FUNCTION);
 
 		return null;
 	}
@@ -162,6 +170,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 	@Override
 	public Void visitReturn(Statement.Return return_) {
+		if (FunctionType.NONE.equals(currentFunctionType)) {
+			lox.error(return_.keyword(), "Can't return from top-level code.");
+		}
+
 		return_.value().ifPresent(this::resolve);
 
 		return null;
@@ -219,6 +231,13 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		resolve(unary.right());
 
 		return null;
+	}
+
+	public enum FunctionType {
+
+		NONE,
+		FUNCTION,
+
 	}
 
 }
