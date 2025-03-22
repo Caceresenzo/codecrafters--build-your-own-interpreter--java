@@ -54,6 +54,7 @@ public class Scanner {
 		}
 
 		tokens.add(new Token(TokenType.EOF, "", new Literal.Nil(), line));
+//		tokens.add(new Token(TokenType.EOF, "", new Literal.Nil(), location()));
 
 		return tokens;
 	}
@@ -217,7 +218,12 @@ public class Scanner {
 	}
 
 	private void addToken(TokenType type, Literal literal) {
+//		tokens.add(new Token(type, text(), literal, location()));
 		tokens.add(new Token(type, text(), literal, line));
+	}
+
+	private Location location() {
+		return new Location(start, current, line);
 	}
 
 	public boolean isAtEnd() {

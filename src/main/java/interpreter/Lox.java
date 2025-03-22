@@ -1,5 +1,8 @@
 package interpreter;
 
+import interpreter.grammar.Token;
+import interpreter.grammar.TokenType;
+
 public class Lox {
 
 	private boolean hadError = false;
@@ -17,10 +20,18 @@ public class Lox {
 		System.err.println("%s%n[line %d]".formatted(message, line));
 	}
 
+	public void error(Token token, String message) {
+		if (TokenType.EOF.equals(token.type())) {
+			report(token.line(), " at end", message);
+		} else {
+			report(token.line(), " at '%s'".formatted(token.lexeme()), message);
+		}
+	}
+
 	public boolean hadError() {
 		return hadError;
 	}
-	
+
 	public boolean hadRuntimeError() {
 		return hadRuntimeError;
 	}

@@ -2,6 +2,7 @@ package interpreter.evaluating;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import interpreter.evaluating.function.Callable;
@@ -44,6 +45,12 @@ public class Environment {
 		throw new RuntimeError("Undefined variable '%s'.".formatted(lexeme), name);
 	}
 
+	public Value getAt(int distance, String name) {
+		final var value = ancestor(distance).values.get(name);
+
+		return Objects.requireNonNull(value);
+	}
+
 	public void assign(Token name, Value value) {
 		final var lexeme = name.lexeme();
 
@@ -58,6 +65,20 @@ public class Environment {
 		}
 
 		throw new RuntimeError("Undefined variable '%s'.".formatted(lexeme), name);
+	}
+
+	public void assignAt(int distance, Token name, Value value) {
+		ancestor(distance).values.put(name.lexeme(), value);
+	}
+
+	public Environment ancestor(int distance) {
+		var environment = this;
+
+		for (var index = 0; index < distance; index++) {
+			environment = environment.enclosing.get();
+		}
+
+		return Objects.requireNonNull(environment);
 	}
 
 	public Environment inner() {
