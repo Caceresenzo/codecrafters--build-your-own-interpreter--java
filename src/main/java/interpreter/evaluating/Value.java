@@ -1,14 +1,16 @@
 package interpreter.evaluating;
 
-import interpreter.evaluating.function.Callable;
+import interpreter.evaluating.Value.LBoolean;
+import interpreter.evaluating.Value.LNil;
+import interpreter.evaluating.Value.LNumber;
+import interpreter.evaluating.Value.LString;
 import lombok.NonNull;
-import lombok.experimental.Delegate;
 
-public sealed interface Value permits Value.Nil, Value.Boolean, Value.String, Value.Number, Value.Function, Instance {
+public sealed interface Value permits LNil, LBoolean, LString, LNumber, LCallable, Instance {
 
 	java.lang.String format();
 
-	public record Nil() implements Value {
+	public record LNil() implements Value {
 
 		@Override
 		public java.lang.String format() {
@@ -17,7 +19,7 @@ public sealed interface Value permits Value.Nil, Value.Boolean, Value.String, Va
 
 	}
 
-	public record Boolean(
+	public record LBoolean(
 		boolean value
 	) implements Value {
 
@@ -28,7 +30,7 @@ public sealed interface Value permits Value.Nil, Value.Boolean, Value.String, Va
 
 	}
 
-	public record String(
+	public record LString(
 		@NonNull java.lang.String value
 	) implements Value {
 
@@ -39,7 +41,7 @@ public sealed interface Value permits Value.Nil, Value.Boolean, Value.String, Va
 
 	}
 
-	public record Number(
+	public record LNumber(
 		double value
 	) implements Value {
 
@@ -51,17 +53,6 @@ public sealed interface Value permits Value.Nil, Value.Boolean, Value.String, Va
 			}
 
 			return Double.toString(value);
-		}
-
-	}
-
-	public record Function(
-		@Delegate Callable callable
-	) implements Value {
-
-		@Override
-		public java.lang.String format() {
-			return callable.format();
 		}
 
 	}

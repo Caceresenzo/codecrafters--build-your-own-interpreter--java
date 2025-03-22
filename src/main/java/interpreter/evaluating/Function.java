@@ -1,18 +1,14 @@
-package interpreter.evaluating.function;
+package interpreter.evaluating;
 
 import java.util.List;
 
-import interpreter.evaluating.Environment;
-import interpreter.evaluating.Instance;
-import interpreter.evaluating.Interpreter;
-import interpreter.evaluating.Value;
 import interpreter.parser.Statement;
 import interpreter.util.Iterators;
 
 public record Function(
 	Statement.Function declaration,
 	Environment closure
-) implements Callable {
+) implements LCallable {
 
 	@Override
 	public String name() {
@@ -37,7 +33,7 @@ public record Function(
 		try {
 			interpreter.executeBlock(declaration.body(), environment);
 
-			return new Value.Nil();
+			return new Value.LNil();
 		} catch (Return return_) {
 			return return_.value();
 		}

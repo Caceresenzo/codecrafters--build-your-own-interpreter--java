@@ -1,7 +1,4 @@
-package interpreter.evaluating.function;
-
-import interpreter.evaluating.RuntimeError;
-import interpreter.evaluating.Value;
+package interpreter.evaluating;
 
 @SuppressWarnings("serial")
 public class Return extends RuntimeError {

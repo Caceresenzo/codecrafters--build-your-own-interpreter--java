@@ -18,7 +18,7 @@ public sealed interface Literal {
 
 		@Override
 		public Value toValue() {
-			return new Value.Nil();
+			return new Value.LNil();
 		}
 
 	}
@@ -34,7 +34,7 @@ public sealed interface Literal {
 
 		@Override
 		public Value toValue() {
-			return new Value.Boolean(value);
+			return new Value.LBoolean(value);
 		}
 
 	}
@@ -50,7 +50,7 @@ public sealed interface Literal {
 
 		@Override
 		public Value toValue() {
-			return new Value.String(value);
+			return new Value.LString(value);
 		}
 
 	}
@@ -66,7 +66,7 @@ public sealed interface Literal {
 
 		@Override
 		public Value toValue() {
-			return new Value.Number(value);
+			return new Value.LNumber(value);
 		}
 
 	}

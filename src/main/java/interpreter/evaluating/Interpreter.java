@@ -7,9 +7,6 @@ import java.util.Map;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
-import interpreter.evaluating.function.Function;
-import interpreter.evaluating.function.Return;
-import interpreter.evaluating.function.SimpleNativeFunction;
 import interpreter.grammar.Token;
 import interpreter.grammar.TokenType;
 import interpreter.parser.Expression;
@@ -32,7 +29,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	) {
 		this.lox = lox;
 
-		this.globals.defineFunction(new SimpleNativeFunction("clock", 0, (__) -> new Value.Number(System.currentTimeMillis() / 1000)));
+		this.globals.defineFunction(new SimpleNativeFunction("clock", 0, (__) -> new Value.LNumber(System.currentTimeMillis() / 1000)));
 	}
 
 	public void interpret(List<Statement> statements) {
@@ -95,7 +92,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitVariable(Statement.Variable variable) {
 		final var value = variable.initializer()
 			.map(this::evaluate)
-			.orElseGet(Value.Nil::new);
+			.orElseGet(Value.LNil::new);
 
 		environment.define(variable.name().lexeme(), value);
 
@@ -153,10 +150,10 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		final var right = evaluate(unary.right());
 
 		return switch (unary.operator().type()) {
-			case BANG -> new Value.Boolean(!isTruthy(right));
+			case BANG -> new Value.LBoolean(!isTruthy(right));
 			case MINUS -> {
-				if (right instanceof Value.Number(final var value)) {
-					yield new Value.Number(-value);
+				if (right instanceof Value.LNumber(final var value)) {
+					yield new Value.LNumber(-value);
 				}
 
 				throw new RuntimeError("Operand must be a number.", unary.operator());
@@ -174,12 +171,12 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		return switch (operatorToken.type()) {
 			case MINUS -> applyNumberOperator(left, operatorToken, right, DoubleOperators::substract);
 			case PLUS -> {
-				if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
-					yield new Value.Number(leftValue + rightValue);
+				if (left instanceof Value.LNumber(final var leftValue) && right instanceof Value.LNumber(final var rightValue)) {
+					yield new Value.LNumber(leftValue + rightValue);
 				}
 
-				if (left instanceof Value.String(final var leftValue) && right instanceof Value.String(final var rightValue)) {
-					yield new Value.String(leftValue + rightValue);
+				if (left instanceof Value.LString(final var leftValue) && right instanceof Value.LString(final var rightValue)) {
+					yield new Value.LString(leftValue + rightValue);
 				}
 
 				throw new RuntimeError("Operands must be two numbers or two strings.", operatorToken);
@@ -190,8 +187,8 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			case GREATER_EQUAL -> applyNumberOperator(left, operatorToken, right, DoubleOperators::greaterThanOrEqual);
 			case LESS -> applyNumberOperator(left, operatorToken, right, DoubleOperators::lessThan);
 			case LESS_EQUAL -> applyNumberOperator(left, operatorToken, right, DoubleOperators::lessThanOrEqual);
-			case BANG_EQUAL -> new Value.Boolean(!left.equals(right));
-			case EQUAL_EQUAL -> new Value.Boolean(left.equals(right));
+			case BANG_EQUAL -> new Value.LBoolean(!left.equals(right));
+			case EQUAL_EQUAL -> new Value.LBoolean(left.equals(right));
 			default -> throw new UnsupportedOperationException();
 		};
 	}
@@ -241,7 +238,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			.map(this::evaluate)
 			.toList();
 
-		if (!(callee instanceof Value.Function(final var callable))) {
+		if (!(callee instanceof LCallable callable)) {
 			throw new RuntimeError("Can only call functions and classes.", call.parenthesis());
 		}
 
@@ -256,7 +253,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitReturn(Statement.Return return_) {
 		final var value = return_.value()
 			.map(this::evaluate)
-			.orElseGet(Value.Nil::new);
+			.orElseGet(Value.LNil::new);
 
 		throw new Return(value);
 	}
@@ -271,8 +268,8 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			methods.put(method.name().lexeme(), function);
 		}
 
-		final var klass = new Class(class_.name().lexeme(), methods);
-		environment.assign(class_.name(), new Value.Function(klass));
+		final var klass = new LClass(class_.name().lexeme(), methods);
+		environment.assign(class_.name(), klass);
 
 		return null;
 	}
@@ -322,23 +319,23 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	public boolean isTruthy(Value value) {
 		return switch (value) {
-			case Value.Nil __ -> false;
-			case Value.Boolean(final var rawValue) -> rawValue;
+			case Value.LNil __ -> false;
+			case Value.LBoolean(final var rawValue) -> rawValue;
 			default -> true;
 		};
 	}
 
-	private Value.Number applyNumberOperator(Value left, Token token, Value right, DoubleBinaryOperator operator) {
-		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
-			return new Value.Number(operator.applyAsDouble(leftValue, rightValue));
+	private Value.LNumber applyNumberOperator(Value left, Token token, Value right, DoubleBinaryOperator operator) {
+		if (left instanceof Value.LNumber(final var leftValue) && right instanceof Value.LNumber(final var rightValue)) {
+			return new Value.LNumber(operator.applyAsDouble(leftValue, rightValue));
 		}
 
 		throw new RuntimeError("Operands must be numbers.", token);
 	}
 
-	private Value.Boolean applyNumberOperator(Value left, Token token, Value right, DoubleComparisonOperator operator) {
-		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
-			return new Value.Boolean(operator.applyAsDouble(leftValue, rightValue));
+	private Value.LBoolean applyNumberOperator(Value left, Token token, Value right, DoubleComparisonOperator operator) {
+		if (left instanceof Value.LNumber(final var leftValue) && right instanceof Value.LNumber(final var rightValue)) {
+			return new Value.LBoolean(operator.applyAsDouble(leftValue, rightValue));
 		}
 
 		throw new RuntimeError("Operands must be numbers.", token);

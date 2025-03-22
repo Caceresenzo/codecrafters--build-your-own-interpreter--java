@@ -3,13 +3,10 @@ package interpreter.evaluating;
 import java.util.List;
 import java.util.Map;
 
-import interpreter.evaluating.function.Callable;
-import interpreter.evaluating.function.Function;
-
-public record Class(
+public record LClass(
 	String name,
 	Map<String, Function> methods
-) implements Callable {
+) implements LCallable {
 
 	@Override
 	public int arity() {

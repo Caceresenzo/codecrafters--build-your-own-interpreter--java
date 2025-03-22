@@ -5,13 +5,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import interpreter.evaluating.function.Callable;
 import interpreter.grammar.Token;
 import lombok.NonNull;
 
 public class Environment {
 
-	private static final Value.Nil NIL = new Value.Nil();
+	private static final Value.LNil NIL = new Value.LNil();
 
 	private final Optional<Environment> enclosing;
 	private final Map<String, Value> values = new HashMap<>();
@@ -24,8 +23,8 @@ public class Environment {
 		this.enclosing = Optional.of(enclosing);
 	}
 
-	public void defineFunction(Callable callable) {
-		define(callable.name(), new Value.Function(callable));
+	public void defineFunction(LCallable callable) {
+		define(callable.name(), callable);
 	}
 
 	public void define(String name, Value value) {

@@ -1,16 +1,13 @@
-package interpreter.evaluating.function;
+package interpreter.evaluating;
 
 import java.util.List;
 import java.util.function.Function;
-
-import interpreter.evaluating.Interpreter;
-import interpreter.evaluating.Value;
 
 public record SimpleNativeFunction(
 	String name,
 	int arity,
 	Function<List<Value>, Value> impl
-) implements Callable {
+) implements LCallable {
 
 	@Override
 	public Value call(Interpreter interpreter, List<Value> arguments) {

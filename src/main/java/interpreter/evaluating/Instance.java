@@ -7,10 +7,10 @@ import interpreter.grammar.Token;
 
 public final class Instance implements Value {
 
-	private final Class klass;
+	private final LClass klass;
 	private final Map<java.lang.String, Value> fields = new HashMap<>();
 
-	public Instance(Class klass) {
+	public Instance(LClass klass) {
 		this.klass = klass;
 	}
 
@@ -22,7 +22,7 @@ public final class Instance implements Value {
 
 		final var method = klass.findMethod(name.lexeme());
 		if (method != null) {
-			return new Value.Function(method.bind(this));
+			return method.bind(this);
 		}
 
 		throw new RuntimeError("Undefined property '%s'.".formatted(name.lexeme()), name);
