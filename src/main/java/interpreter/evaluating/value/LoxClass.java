@@ -12,12 +12,22 @@ public record LoxClass(
 
 	@Override
 	public int arity() {
+		final var initializer = findMethod("init");
+		if (initializer != null) {
+			return initializer.arity();
+		}
+
 		return 0;
 	}
 
 	@Override
 	public LoxValue call(Interpreter interpreter, List<LoxValue> arguments) {
 		final var instance = new LoxInstance(this);
+
+		final var initializer = findMethod("init");
+		if (initializer != null) {
+			initializer.bind(instance).call(interpreter, arguments);
+		}
 
 		return instance;
 	}

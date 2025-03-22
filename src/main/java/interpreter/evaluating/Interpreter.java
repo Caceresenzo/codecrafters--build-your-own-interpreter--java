@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
-import interpreter.evaluating.value.LoxInstance;
-import interpreter.evaluating.value.LoxClass;
 import interpreter.evaluating.value.LoxBoolean;
 import interpreter.evaluating.value.LoxCallable;
+import interpreter.evaluating.value.LoxClass;
 import interpreter.evaluating.value.LoxFunction;
+import interpreter.evaluating.value.LoxInstance;
 import interpreter.evaluating.value.LoxNil;
 import interpreter.evaluating.value.LoxNumber;
 import interpreter.evaluating.value.LoxString;
@@ -137,7 +137,7 @@ public class Interpreter implements Expression.Visitor<LoxValue>, Statement.Visi
 
 	@Override
 	public Void visitFunction(Statement.Function function) {
-		final var callable = new LoxFunction(function, environment);
+		final var callable = new LoxFunction(function, environment, false);
 
 		environment.defineFunction(callable);
 
@@ -273,7 +273,7 @@ public class Interpreter implements Expression.Visitor<LoxValue>, Statement.Visi
 
 		final var methods = new HashMap<String, LoxFunction>();
 		for (final var method : class_.methods()) {
-			final var function = new LoxFunction(method, environment);
+			final var function = new LoxFunction(method, environment, "init".equals(method.name().lexeme()));
 			methods.put(method.name().lexeme(), function);
 		}
 
