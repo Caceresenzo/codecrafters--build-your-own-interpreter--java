@@ -260,6 +260,16 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		throw new Return(value);
 	}
 
+	@Override
+	public Void visitClass(Statement.Class class_) {
+		environment.define(class_.name().lexeme(), null);
+
+		final var klass = new Class(class_.name().lexeme());
+		environment.assign(class_.name(), new Value.Function(klass));
+
+		return null;
+	}
+
 	public void resolve(Expression expression, int depth) {
 		locals.put(expression, depth);
 	}

@@ -47,6 +47,11 @@ public sealed interface Statement {
 		@NonNull Optional<interpreter.parser.Expression> value
 	) implements Statement {}
 
+	public record Class(
+		@NonNull Token name,
+		@NonNull List<Function> methods
+	) implements Statement {}
+
 	public interface Visitor<T> {
 
 		T visitExpression(Expression expression);
@@ -65,6 +70,8 @@ public sealed interface Statement {
 
 		T visitReturn(Return return_);
 
+		T visitClass(Class class_);
+
 		default T visit(Statement statement) {
 			return switch (statement) {
 				case Expression expression -> visitExpression(expression);
@@ -75,6 +82,7 @@ public sealed interface Statement {
 				case While while_ -> visitWhile(while_);
 				case Function function -> visitFunction(function);
 				case Return return_ -> visitReturn(return_);
+				case Class class_ -> visitClass(class_);
 			};
 		}
 

@@ -11,6 +11,8 @@ import lombok.NonNull;
 
 public class Environment {
 
+	private static final Value.Nil NIL = new Value.Nil();
+
 	private final Optional<Environment> enclosing;
 	private final Map<String, Value> values = new HashMap<>();
 
@@ -27,6 +29,10 @@ public class Environment {
 	}
 
 	public void define(String name, Value value) {
+		if (value == null) {
+			value = NIL;
+		}
+
 		values.put(name, value);
 	}
 
