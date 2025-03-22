@@ -15,7 +15,6 @@ import interpreter.grammar.TokenType;
 import interpreter.parser.Expression;
 import interpreter.parser.Expression.Call;
 import interpreter.parser.Expression.Logical;
-import interpreter.parser.Expression.Set;
 import interpreter.parser.Statement;
 import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
@@ -290,7 +289,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitSet(Set set) {
+	public Value visitSet(Expression.Set set) {
 		final var object = evaluate(set.object());
 		if (!(object instanceof Instance instance)) {
 			throw new RuntimeError("Only instances have fields.", set.name());
@@ -300,6 +299,11 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		instance.set(set.name(), value);
 
 		return value;
+	}
+
+	@Override
+	public Value visitThis(Expression.This this_) {
+		return lookUpVariable(this_.keyword(), this_);
 	}
 
 	public void resolve(Expression expression, int depth) {

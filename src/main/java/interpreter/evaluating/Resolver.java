@@ -234,11 +234,16 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		declare(class_.name());
 		define(class_.name());
 
+		beginScope();
+		scopes.peek().put("this", true);
+
 		for (final var method : class_.methods()) {
 			var declaration = FunctionType.METHOD;
 
 			resolveFunction(method, declaration);
 		}
+
+		endScope();
 
 		return null;
 	}
@@ -254,6 +259,13 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 	public Void visitSet(Expression.Set set) {
 		resolve(set.value());
 		resolve(set.object());
+
+		return null;
+	}
+
+	@Override
+	public Void visitThis(Expression.This this_) {
+		resolveLocal(this_, this_.keyword());
 
 		return null;
 	}

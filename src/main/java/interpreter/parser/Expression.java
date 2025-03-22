@@ -58,6 +58,10 @@ public sealed interface Expression {
 		@NonNull Expression value
 	) implements Expression {}
 
+	public record This(
+		@NonNull Token keyword
+	) implements Expression {}
+
 	public interface Visitor<T> {
 
 		T visitLiteral(Literal literal);
@@ -80,6 +84,8 @@ public sealed interface Expression {
 
 		T visitSet(Set set);
 
+		T visitThis(This this_);
+
 		default T visit(Expression expression) {
 			return switch (expression) {
 				case Literal literal -> visitLiteral(literal);
@@ -92,6 +98,7 @@ public sealed interface Expression {
 				case Call call -> visitCall(call);
 				case Get get -> visitGet(get);
 				case Set set -> visitSet(set);
+				case This this_ -> visitThis(this_);
 			};
 		}
 

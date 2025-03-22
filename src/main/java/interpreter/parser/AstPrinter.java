@@ -3,14 +3,6 @@ package interpreter.parser;
 import java.util.List;
 
 import interpreter.grammar.Literal;
-import interpreter.parser.Expression.Assign;
-import interpreter.parser.Expression.Binary;
-import interpreter.parser.Expression.Call;
-import interpreter.parser.Expression.Get;
-import interpreter.parser.Expression.Logical;
-import interpreter.parser.Expression.Set;
-import interpreter.parser.Expression.Unary;
-import interpreter.parser.Expression.Variable;
 
 public class AstPrinter implements Expression.Visitor<String> {
 
@@ -31,42 +23,47 @@ public class AstPrinter implements Expression.Visitor<String> {
 	}
 
 	@Override
-	public String visitUnary(Unary unary) {
+	public String visitUnary(Expression.Unary unary) {
 		return parenthesize(unary.operator().lexeme(), List.of(unary.right()));
 	}
 
 	@Override
-	public String visitBinary(Binary binary) {
+	public String visitBinary(Expression.Binary binary) {
 		return parenthesize(binary.operator().lexeme(), List.of(binary.left(), binary.right()));
 	}
 
 	@Override
-	public String visitVariable(Variable variable) {
+	public String visitVariable(Expression.Variable variable) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String visitAssign(Assign assign) {
+	public String visitAssign(Expression.Assign assign) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String visitLogical(Logical logical) {
+	public String visitLogical(Expression.Logical logical) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String visitCall(Call call) {
+	public String visitCall(Expression.Call call) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String visitGet(Get get) {
+	public String visitGet(Expression.Get get) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String visitSet(Set set) {
+	public String visitSet(Expression.Set set) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String visitThis(Expression.This this_) {
 		throw new UnsupportedOperationException();
 	}
 

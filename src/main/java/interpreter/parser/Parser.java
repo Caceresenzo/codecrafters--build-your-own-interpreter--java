@@ -415,6 +415,10 @@ public class Parser {
 			return new Expression.Literal(new Literal.Nil());
 		}
 
+		if (match(TokenType.THIS)) {
+			return new Expression.This(previous());
+		}
+
 		if (match(TokenType.IDENTIFIER)) {
 			return new Expression.Variable(previous());
 		}

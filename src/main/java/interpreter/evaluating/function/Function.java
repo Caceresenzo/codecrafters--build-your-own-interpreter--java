@@ -3,6 +3,7 @@ package interpreter.evaluating.function;
 import java.util.List;
 
 import interpreter.evaluating.Environment;
+import interpreter.evaluating.Instance;
 import interpreter.evaluating.Interpreter;
 import interpreter.evaluating.Value;
 import interpreter.parser.Statement;
@@ -40,6 +41,13 @@ public record Function(
 		} catch (Return return_) {
 			return return_.value();
 		}
+	}
+
+	public Function bind(Instance instance) {
+		final var environment = closure.inner();
+		environment.define("this", instance);
+
+		return new Function(declaration, environment);
 	}
 
 	@Override
