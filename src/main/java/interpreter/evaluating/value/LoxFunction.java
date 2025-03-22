@@ -10,7 +10,8 @@ import interpreter.util.Iterators;
 
 public record LoxFunction(
 	Statement.Function declaration,
-	Environment closure
+	Environment closure,
+	boolean isInitializer
 ) implements LoxCallable {
 
 	@Override
@@ -33,20 +34,26 @@ public record LoxFunction(
 			(parameter, argument) -> environment.define(parameter.lexeme(), argument)
 		);
 
+		LoxValue returnedValue = LoxNil.INSTANCE;
+
 		try {
 			interpreter.executeBlock(declaration.body(), environment);
-
-			return LoxNil.INSTANCE;
 		} catch (Return return_) {
-			return return_.value();
+			returnedValue = return_.value();
 		}
+
+		if (isInitializer) {
+			return closure.getAt(0, "this");
+		}
+
+		return returnedValue;
 	}
 
 	public LoxFunction bind(LoxInstance instance) {
 		final var environment = closure.inner();
 		environment.define("this", instance);
 
-		return new LoxFunction(declaration, environment);
+		return new LoxFunction(declaration, environment, isInitializer);
 	}
 
 	@Override
