@@ -1,18 +1,17 @@
-package interpreter.evaluating.function;
+package interpreter.evaluating.value;
 
 import java.util.List;
 
 import interpreter.evaluating.Environment;
-import interpreter.evaluating.Instance;
 import interpreter.evaluating.Interpreter;
-import interpreter.evaluating.Value;
+import interpreter.evaluating.Return;
 import interpreter.parser.Statement;
 import interpreter.util.Iterators;
 
-public record Function(
+public record LoxFunction(
 	Statement.Function declaration,
 	Environment closure
-) implements Callable {
+) implements LoxCallable {
 
 	@Override
 	public String name() {
@@ -25,7 +24,7 @@ public record Function(
 	}
 
 	@Override
-	public Value call(Interpreter interpreter, List<Value> arguments) {
+	public LoxValue call(Interpreter interpreter, List<LoxValue> arguments) {
 		final var environment = closure.inner();
 
 		Iterators.zip(
@@ -37,17 +36,17 @@ public record Function(
 		try {
 			interpreter.executeBlock(declaration.body(), environment);
 
-			return new Value.Nil();
+			return LoxNil.INSTANCE;
 		} catch (Return return_) {
 			return return_.value();
 		}
 	}
 
-	public Function bind(Instance instance) {
+	public LoxFunction bind(LoxInstance instance) {
 		final var environment = closure.inner();
 		environment.define("this", instance);
 
-		return new Function(declaration, environment);
+		return new LoxFunction(declaration, environment);
 	}
 
 	@Override
