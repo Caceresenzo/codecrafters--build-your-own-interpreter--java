@@ -10,12 +10,14 @@ public record Class(
 
 	@Override
 	public int arity() {
-		throw new UnsupportedOperationException();
+		return 0;
 	}
 
 	@Override
 	public Value call(Interpreter interpreter, List<Value> arguments) {
-		throw new UnsupportedOperationException();
+		final var instance = new Instance(this);
+
+		return instance;
 	}
 
 	@Override

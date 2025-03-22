@@ -4,7 +4,7 @@ import interpreter.evaluating.function.Callable;
 import lombok.NonNull;
 import lombok.experimental.Delegate;
 
-public sealed interface Value {
+public sealed interface Value permits Value.Nil, Value.Boolean, Value.String, Value.Number, Value.Function, Instance {
 
 	java.lang.String format();
 
