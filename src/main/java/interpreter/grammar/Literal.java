@@ -1,13 +1,17 @@
 package interpreter.grammar;
 
-import interpreter.evaluating.Value;
+import interpreter.evaluating.value.LoxBoolean;
+import interpreter.evaluating.value.LoxNil;
+import interpreter.evaluating.value.LoxNumber;
+import interpreter.evaluating.value.LoxString;
+import interpreter.evaluating.value.LoxValue;
 import lombok.NonNull;
 
 public sealed interface Literal {
 
 	java.lang.String format();
 
-	Value toValue();
+	LoxValue toValue();
 
 	public record Nil() implements Literal {
 
@@ -17,8 +21,8 @@ public sealed interface Literal {
 		}
 
 		@Override
-		public Value toValue() {
-			return new Value.Nil();
+		public LoxValue toValue() {
+			return LoxNil.INSTANCE;
 		}
 
 	}
@@ -33,8 +37,8 @@ public sealed interface Literal {
 		}
 
 		@Override
-		public Value toValue() {
-			return new Value.Boolean(value);
+		public LoxValue toValue() {
+			return LoxBoolean.valueOf(value);
 		}
 
 	}
@@ -49,8 +53,8 @@ public sealed interface Literal {
 		}
 
 		@Override
-		public Value toValue() {
-			return new Value.String(value);
+		public LoxValue toValue() {
+			return new LoxString(value);
 		}
 
 	}
@@ -65,8 +69,8 @@ public sealed interface Literal {
 		}
 
 		@Override
-		public Value toValue() {
-			return new Value.Number(value);
+		public LoxValue toValue() {
+			return new LoxNumber(value);
 		}
 
 	}

@@ -1,20 +1,21 @@
-package interpreter.evaluating;
+package interpreter.evaluating.value;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import interpreter.evaluating.RuntimeError;
 import interpreter.grammar.Token;
 
-public final class Instance implements Value {
+public final class Instance implements LoxValue {
 
-	private final Class klass;
-	private final Map<java.lang.String, Value> fields = new HashMap<>();
+	private final LClass klass;
+	private final Map<java.lang.String, LoxValue> fields = new HashMap<>();
 
-	public Instance(Class klass) {
+	public Instance(LClass klass) {
 		this.klass = klass;
 	}
 
-	public Value get(Token name) {
+	public LoxValue get(Token name) {
 		final var value = fields.get(name.lexeme());
 		if (value != null) {
 			return value;
@@ -22,13 +23,13 @@ public final class Instance implements Value {
 
 		final var method = klass.findMethod(name.lexeme());
 		if (method != null) {
-			return new Value.Function(method.bind(this));
+			return method.bind(this);
 		}
 
 		throw new RuntimeError("Undefined property '%s'.".formatted(name.lexeme()), name);
 	}
 
-	public void set(Token name, Value value) {
+	public void set(Token name, LoxValue value) {
 		fields.put(name.lexeme(), value);
 	}
 
