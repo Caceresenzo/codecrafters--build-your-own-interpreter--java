@@ -7,9 +7,15 @@ import java.util.Map;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
-import interpreter.evaluating.function.Function;
-import interpreter.evaluating.function.Return;
-import interpreter.evaluating.function.SimpleNativeFunction;
+import interpreter.evaluating.value.Instance;
+import interpreter.evaluating.value.LClass;
+import interpreter.evaluating.value.LoxBoolean;
+import interpreter.evaluating.value.LoxCallable;
+import interpreter.evaluating.value.LoxFunction;
+import interpreter.evaluating.value.LoxNil;
+import interpreter.evaluating.value.LoxNumber;
+import interpreter.evaluating.value.LoxString;
+import interpreter.evaluating.value.LoxValue;
 import interpreter.grammar.Token;
 import interpreter.grammar.TokenType;
 import interpreter.parser.Expression;
@@ -20,7 +26,7 @@ import interpreter.util.DoubleOperators;
 import interpreter.util.function.DoubleComparisonOperator;
 import lombok.NonNull;
 
-public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor<Void> {
+public class Interpreter implements Expression.Visitor<LoxValue>, Statement.Visitor<Void> {
 
 	private final Lox lox;
 	private final Environment globals = new Environment();
@@ -32,7 +38,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	) {
 		this.lox = lox;
 
-		this.globals.defineFunction(new SimpleNativeFunction("clock", 0, (__) -> new Value.Number(System.currentTimeMillis() / 1000)));
+		this.globals.defineFunction(new SimpleNativeFunction("clock", 0, (__) -> new LoxNumber(System.currentTimeMillis() / 1000)));
 	}
 
 	public void interpret(List<Statement> statements) {
@@ -72,7 +78,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		visit(statement);
 	}
 
-	public Value evaluate(Expression expression) {
+	public LoxValue evaluate(Expression expression) {
 		return visit(expression);
 	}
 
@@ -95,7 +101,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitVariable(Statement.Variable variable) {
 		final var value = variable.initializer()
 			.map(this::evaluate)
-			.orElseGet(Value.Nil::new);
+			.orElse(LoxNil.INSTANCE);
 
 		environment.define(variable.name().lexeme(), value);
 
@@ -131,7 +137,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	@Override
 	public Void visitFunction(Statement.Function function) {
-		final var callable = new Function(function, environment);
+		final var callable = new LoxFunction(function, environment);
 
 		environment.defineFunction(callable);
 
@@ -139,24 +145,24 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitLiteral(Expression.Literal literal) {
+	public LoxValue visitLiteral(Expression.Literal literal) {
 		return literal.value().toValue();
 	}
 
 	@Override
-	public Value visitGrouping(Expression.Grouping grouping) {
+	public LoxValue visitGrouping(Expression.Grouping grouping) {
 		return evaluate(grouping.expression());
 	}
 
 	@Override
-	public Value visitUnary(Expression.Unary unary) {
+	public LoxValue visitUnary(Expression.Unary unary) {
 		final var right = evaluate(unary.right());
 
 		return switch (unary.operator().type()) {
-			case BANG -> new Value.Boolean(!isTruthy(right));
+			case BANG -> LoxBoolean.valueOf(!isTruthy(right));
 			case MINUS -> {
-				if (right instanceof Value.Number(final var value)) {
-					yield new Value.Number(-value);
+				if (right instanceof LoxNumber(final var value)) {
+					yield new LoxNumber(-value);
 				}
 
 				throw new RuntimeError("Operand must be a number.", unary.operator());
@@ -166,7 +172,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitBinary(Expression.Binary binary) {
+	public LoxValue visitBinary(Expression.Binary binary) {
 		final var left = evaluate(binary.left());
 		final var right = evaluate(binary.right());
 
@@ -174,12 +180,12 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		return switch (operatorToken.type()) {
 			case MINUS -> applyNumberOperator(left, operatorToken, right, DoubleOperators::substract);
 			case PLUS -> {
-				if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
-					yield new Value.Number(leftValue + rightValue);
+				if (left instanceof LoxNumber(final var leftValue) && right instanceof LoxNumber(final var rightValue)) {
+					yield new LoxNumber(leftValue + rightValue);
 				}
 
-				if (left instanceof Value.String(final var leftValue) && right instanceof Value.String(final var rightValue)) {
-					yield new Value.String(leftValue + rightValue);
+				if (left instanceof LoxString(final var leftValue) && right instanceof LoxString(final var rightValue)) {
+					yield new LoxString(leftValue + rightValue);
 				}
 
 				throw new RuntimeError("Operands must be two numbers or two strings.", operatorToken);
@@ -190,14 +196,14 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			case GREATER_EQUAL -> applyNumberOperator(left, operatorToken, right, DoubleOperators::greaterThanOrEqual);
 			case LESS -> applyNumberOperator(left, operatorToken, right, DoubleOperators::lessThan);
 			case LESS_EQUAL -> applyNumberOperator(left, operatorToken, right, DoubleOperators::lessThanOrEqual);
-			case BANG_EQUAL -> new Value.Boolean(!left.equals(right));
-			case EQUAL_EQUAL -> new Value.Boolean(left.equals(right));
+			case BANG_EQUAL -> LoxBoolean.valueOf(!left.equals(right));
+			case EQUAL_EQUAL -> LoxBoolean.valueOf(left.equals(right));
 			default -> throw new UnsupportedOperationException();
 		};
 	}
 
 	@Override
-	public Value visitAssign(Expression.Assign assign) {
+	public LoxValue visitAssign(Expression.Assign assign) {
 		final var value = evaluate(assign.value());
 
 		final var distance = locals.get(assign);
@@ -211,12 +217,12 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitVariable(Expression.Variable variable) {
+	public LoxValue visitVariable(Expression.Variable variable) {
 		return lookUpVariable(variable.name(), variable);
 	}
 
 	@Override
-	public Value visitLogical(Logical logical) {
+	public LoxValue visitLogical(Logical logical) {
 		final var left = evaluate(logical.left());
 
 		if (TokenType.OR.equals(logical.operator().type())) {
@@ -233,7 +239,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitCall(Call call) {
+	public LoxValue visitCall(Call call) {
 		final var callee = evaluate(call.callee());
 
 		final var arguments = call.arguments()
@@ -241,7 +247,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 			.map(this::evaluate)
 			.toList();
 
-		if (!(callee instanceof Value.Function(final var callable))) {
+		if (!(callee instanceof LoxCallable callable)) {
 			throw new RuntimeError("Can only call functions and classes.", call.parenthesis());
 		}
 
@@ -256,7 +262,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitReturn(Statement.Return return_) {
 		final var value = return_.value()
 			.map(this::evaluate)
-			.orElseGet(Value.Nil::new);
+			.orElse(LoxNil.INSTANCE);
 
 		throw new Return(value);
 	}
@@ -265,20 +271,20 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitClass(Statement.Class class_) {
 		environment.define(class_.name().lexeme(), null);
 
-		final var methods = new HashMap<String, Function>();
+		final var methods = new HashMap<String, LoxFunction>();
 		for (final var method : class_.methods()) {
-			final var function = new Function(method, environment);
+			final var function = new LoxFunction(method, environment);
 			methods.put(method.name().lexeme(), function);
 		}
 
-		final var klass = new Class(class_.name().lexeme(), methods);
-		environment.assign(class_.name(), new Value.Function(klass));
+		final var klass = new LClass(class_.name().lexeme(), methods);
+		environment.assign(class_.name(), klass);
 
 		return null;
 	}
 
 	@Override
-	public Value visitGet(Expression.Get get) {
+	public LoxValue visitGet(Expression.Get get) {
 		final var object = evaluate(get.object());
 
 		if (object instanceof Instance instance) {
@@ -289,7 +295,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitSet(Expression.Set set) {
+	public LoxValue visitSet(Expression.Set set) {
 		final var object = evaluate(set.object());
 		if (!(object instanceof Instance instance)) {
 			throw new RuntimeError("Only instances have fields.", set.name());
@@ -302,7 +308,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	}
 
 	@Override
-	public Value visitThis(Expression.This this_) {
+	public LoxValue visitThis(Expression.This this_) {
 		return lookUpVariable(this_.keyword(), this_);
 	}
 
@@ -310,7 +316,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		locals.put(expression, depth);
 	}
 
-	public Value lookUpVariable(Token name, Expression expression) {
+	public LoxValue lookUpVariable(Token name, Expression expression) {
 		final var distance = locals.get(expression);
 
 		if (distance != null) {
@@ -320,25 +326,25 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 		return globals.get(name);
 	}
 
-	public boolean isTruthy(Value value) {
+	public boolean isTruthy(LoxValue value) {
 		return switch (value) {
-			case Value.Nil __ -> false;
-			case Value.Boolean(final var rawValue) -> rawValue;
+			case LoxNil __ -> false;
+			case LoxBoolean boolean_ -> boolean_.value();
 			default -> true;
 		};
 	}
 
-	private Value.Number applyNumberOperator(Value left, Token token, Value right, DoubleBinaryOperator operator) {
-		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
-			return new Value.Number(operator.applyAsDouble(leftValue, rightValue));
+	private LoxNumber applyNumberOperator(LoxValue left, Token token, LoxValue right, DoubleBinaryOperator operator) {
+		if (left instanceof LoxNumber(final var leftValue) && right instanceof LoxNumber(final var rightValue)) {
+			return new LoxNumber(operator.applyAsDouble(leftValue, rightValue));
 		}
 
 		throw new RuntimeError("Operands must be numbers.", token);
 	}
 
-	private Value.Boolean applyNumberOperator(Value left, Token token, Value right, DoubleComparisonOperator operator) {
-		if (left instanceof Value.Number(final var leftValue) && right instanceof Value.Number(final var rightValue)) {
-			return new Value.Boolean(operator.applyAsDouble(leftValue, rightValue));
+	private LoxBoolean applyNumberOperator(LoxValue left, Token token, LoxValue right, DoubleComparisonOperator operator) {
+		if (left instanceof LoxNumber(final var leftValue) && right instanceof LoxNumber(final var rightValue)) {
+			return LoxBoolean.valueOf(operator.applyAsDouble(leftValue, rightValue));
 		}
 
 		throw new RuntimeError("Operands must be numbers.", token);

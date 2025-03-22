@@ -5,16 +5,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import interpreter.evaluating.function.Callable;
+import interpreter.evaluating.value.LoxCallable;
+import interpreter.evaluating.value.LoxNil;
+import interpreter.evaluating.value.LoxValue;
 import interpreter.grammar.Token;
 import lombok.NonNull;
 
 public class Environment {
 
-	private static final Value.Nil NIL = new Value.Nil();
-
 	private final Optional<Environment> enclosing;
-	private final Map<String, Value> values = new HashMap<>();
+	private final Map<String, LoxValue> values = new HashMap<>();
 
 	public Environment() {
 		this.enclosing = Optional.empty();
@@ -24,19 +24,19 @@ public class Environment {
 		this.enclosing = Optional.of(enclosing);
 	}
 
-	public void defineFunction(Callable callable) {
-		define(callable.name(), new Value.Function(callable));
+	public void defineFunction(LoxCallable callable) {
+		define(callable.name(), callable);
 	}
 
-	public void define(String name, Value value) {
+	public void define(String name, LoxValue value) {
 		if (value == null) {
-			value = NIL;
+			value = LoxNil.INSTANCE;
 		}
 
 		values.put(name, value);
 	}
 
-	public Value get(Token name) {
+	public LoxValue get(Token name) {
 		final var lexeme = name.lexeme();
 
 		final var value = values.get(lexeme);
@@ -51,13 +51,13 @@ public class Environment {
 		throw new RuntimeError("Undefined variable '%s'.".formatted(lexeme), name);
 	}
 
-	public Value getAt(int distance, String name) {
+	public LoxValue getAt(int distance, String name) {
 		final var value = ancestor(distance).values.get(name);
 
 		return Objects.requireNonNull(value);
 	}
 
-	public void assign(Token name, Value value) {
+	public void assign(Token name, LoxValue value) {
 		final var lexeme = name.lexeme();
 
 		final var previous = values.replace(lexeme, value);
@@ -73,7 +73,7 @@ public class Environment {
 		throw new RuntimeError("Undefined variable '%s'.".formatted(lexeme), name);
 	}
 
-	public void assignAt(int distance, Token name, Value value) {
+	public void assignAt(int distance, Token name, LoxValue value) {
 		ancestor(distance).values.put(name.lexeme(), value);
 	}
 
