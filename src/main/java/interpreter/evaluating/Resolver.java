@@ -171,7 +171,13 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 			lox.error(return_.keyword(), "Can't return from top-level code.");
 		}
 
-		return_.value().ifPresent(this::resolve);
+		if (return_.value().isPresent()) {
+			if (FunctionType.INITIALIZER.equals(currentFunctionType)) {
+				lox.error(return_.keyword(), "Can't return a value from an initializer.");
+			}
+
+			resolve(return_.value().get());
+		}
 
 		return null;
 	}
@@ -243,6 +249,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 		for (final var method : class_.methods()) {
 			var declaration = FunctionType.METHOD;
+			if (method.name().lexeme().equals("init")) {
+				declaration = FunctionType.INITIALIZER;
+			}
 
 			resolveFunction(method, declaration);
 		}
@@ -284,6 +293,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 		NONE,
 		FUNCTION,
+		INITIALIZER,
 		METHOD,
 
 	}
