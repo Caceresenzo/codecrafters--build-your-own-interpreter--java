@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import interpreter.evaluating.Interpreter;
+import interpreter.evaluating.Resolver;
 import interpreter.grammar.Scanner;
 import interpreter.parser.AstPrinter;
 import interpreter.parser.Parser;
@@ -69,6 +70,14 @@ public class Main {
 		}
 
 		final var interpreter = new Interpreter(lox);
+
+		final var resolver = new Resolver(interpreter);
+		resolver.resolve(statements);
+
+		if (lox.hadError()) {
+			return;
+		}
+
 		interpreter.interpret(statements);
 	}
 

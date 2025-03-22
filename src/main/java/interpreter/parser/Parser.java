@@ -462,11 +462,7 @@ public class Parser {
 	}
 
 	private ParseError error(Token token, String message) {
-		if (TokenType.EOF.equals(token.type())) {
-			lox.report(token.line(), " at end", message);
-		} else {
-			lox.report(token.line(), " at '%s'".formatted(token.lexeme()), message);
-		}
+		lox.error(token, message);
 
 		throw new ParseError(token, message);
 	}
