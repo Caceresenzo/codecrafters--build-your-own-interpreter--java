@@ -47,6 +47,17 @@ public sealed interface Expression {
 		@NonNull List<Expression> arguments
 	) implements Expression {}
 
+	public record Get(
+		@NonNull Expression object,
+		@NonNull Token name
+	) implements Expression {}
+
+	public record Set(
+		@NonNull Expression object,
+		@NonNull Token name,
+		@NonNull Expression value
+	) implements Expression {}
+
 	public interface Visitor<T> {
 
 		T visitLiteral(Literal literal);
@@ -65,6 +76,10 @@ public sealed interface Expression {
 
 		T visitCall(Call call);
 
+		T visitGet(Get get);
+
+		T visitSet(Set set);
+
 		default T visit(Expression expression) {
 			return switch (expression) {
 				case Literal literal -> visitLiteral(literal);
@@ -75,6 +90,8 @@ public sealed interface Expression {
 				case Assign assign -> visitAssign(assign);
 				case Logical logical -> visitLogical(logical);
 				case Call call -> visitCall(call);
+				case Get get -> visitGet(get);
+				case Set set -> visitSet(set);
 			};
 		}
 

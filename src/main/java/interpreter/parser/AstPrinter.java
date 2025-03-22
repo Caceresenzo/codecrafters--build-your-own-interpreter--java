@@ -6,7 +6,9 @@ import interpreter.grammar.Literal;
 import interpreter.parser.Expression.Assign;
 import interpreter.parser.Expression.Binary;
 import interpreter.parser.Expression.Call;
+import interpreter.parser.Expression.Get;
 import interpreter.parser.Expression.Logical;
+import interpreter.parser.Expression.Set;
 import interpreter.parser.Expression.Unary;
 import interpreter.parser.Expression.Variable;
 
@@ -55,6 +57,16 @@ public class AstPrinter implements Expression.Visitor<String> {
 
 	@Override
 	public String visitCall(Call call) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String visitGet(Get get) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String visitSet(Set set) {
 		throw new UnsupportedOperationException();
 	}
 
