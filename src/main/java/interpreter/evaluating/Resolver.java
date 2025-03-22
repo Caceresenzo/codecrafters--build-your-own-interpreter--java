@@ -52,6 +52,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		}
 
 		final var scope = scopes.peek();
+		if (scope.containsKey(name.lexeme())) {
+			lox.error(name, "Already a variable with this name in this scope.");
+		}
+
 		scope.put(name.lexeme(), false);
 	}
 
