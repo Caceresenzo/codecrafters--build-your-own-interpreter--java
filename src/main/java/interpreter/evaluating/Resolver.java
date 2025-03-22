@@ -243,6 +243,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 		for (final var method : class_.methods()) {
 			var declaration = FunctionType.METHOD;
+			if (method.name().lexeme().equals("init")) {
+				declaration = FunctionType.INITIALIZER;
+			}
 
 			resolveFunction(method, declaration);
 		}
@@ -284,6 +287,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 		NONE,
 		FUNCTION,
+		INITIALIZER,
 		METHOD,
 
 	}
