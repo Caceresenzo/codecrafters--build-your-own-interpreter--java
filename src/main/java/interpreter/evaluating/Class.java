@@ -1,11 +1,14 @@
 package interpreter.evaluating;
 
 import java.util.List;
+import java.util.Map;
 
 import interpreter.evaluating.function.Callable;
+import interpreter.evaluating.function.Function;
 
 public record Class(
-	String name
+	String name,
+	Map<String, Function> methods
 ) implements Callable {
 
 	@Override
@@ -23,6 +26,10 @@ public record Class(
 	@Override
 	public String format() {
 		return name;
+	}
+
+	public Function findMethod(String name) {
+		return methods.get(name);
 	}
 
 }

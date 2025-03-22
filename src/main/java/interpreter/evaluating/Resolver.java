@@ -234,6 +234,12 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		declare(class_.name());
 		define(class_.name());
 
+		for (final var method : class_.methods()) {
+			var declaration = FunctionType.METHOD;
+
+			resolveFunction(method, declaration);
+		}
+
 		return null;
 	}
 
@@ -256,6 +262,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 		NONE,
 		FUNCTION,
+		METHOD,
 
 	}
 
