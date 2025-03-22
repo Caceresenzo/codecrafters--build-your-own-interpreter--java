@@ -1,13 +1,14 @@
 package interpreter.evaluating;
 
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleBinaryOperator;
 
 import interpreter.Lox;
+import interpreter.evaluating.function.Function;
 import interpreter.evaluating.function.Return;
-import interpreter.evaluating.function.RuntimeFunction;
 import interpreter.evaluating.function.SimpleNativeFunction;
 import interpreter.grammar.Token;
 import interpreter.grammar.TokenType;
@@ -131,7 +132,7 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 	@Override
 	public Void visitFunction(Statement.Function function) {
-		final var callable = new RuntimeFunction(function, environment);
+		final var callable = new Function(function, environment);
 
 		environment.defineFunction(callable);
 
@@ -265,7 +266,13 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 	public Void visitClass(Statement.Class class_) {
 		environment.define(class_.name().lexeme(), null);
 
-		final var klass = new Class(class_.name().lexeme());
+		final var methods = new HashMap<String, Function>();
+		for (final var method : class_.methods()) {
+			final var function = new Function(method, environment);
+			methods.put(method.name().lexeme(), function);
+		}
+
+		final var klass = new Class(class_.name().lexeme(), methods);
 		environment.assign(class_.name(), new Value.Function(klass));
 
 		return null;
@@ -281,17 +288,17 @@ public class Interpreter implements Expression.Visitor<Value>, Statement.Visitor
 
 		throw new RuntimeError("Only instances have properties.", get.name());
 	}
-	
+
 	@Override
 	public Value visitSet(Set set) {
 		final var object = evaluate(set.object());
 		if (!(object instanceof Instance instance)) {
 			throw new RuntimeError("Only instances have fields.", set.name());
 		}
-		
+
 		final var value = evaluate(set.value());
 		instance.set(set.name(), value);
-		
+
 		return value;
 	}
 

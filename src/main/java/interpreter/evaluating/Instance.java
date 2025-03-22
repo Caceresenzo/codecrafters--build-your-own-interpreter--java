@@ -20,6 +20,11 @@ public final class Instance implements Value {
 			return value;
 		}
 
+		final var method = klass.findMethod(name.lexeme());
+		if (method != null) {
+			return new Value.Function(method);
+		}
+
 		throw new RuntimeError("Undefined property '%s'.".formatted(name.lexeme()), name);
 	}
 

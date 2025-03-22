@@ -8,7 +8,7 @@ import interpreter.evaluating.Value;
 import interpreter.parser.Statement;
 import interpreter.util.Iterators;
 
-public record RuntimeFunction(
+public record Function(
 	Statement.Function declaration,
 	Environment closure
 ) implements Callable {
