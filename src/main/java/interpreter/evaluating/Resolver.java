@@ -17,6 +17,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 	private final Lox lox;
 
 	private @NonNull FunctionType currentFunctionType = FunctionType.NONE;
+	private @NonNull ClassType currentClassType = ClassType.NONE;
 
 	private final Stack<Map<String, Boolean>> scopes = new Stack<>();
 
@@ -231,6 +232,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 	@Override
 	public Void visitClass(Statement.Class class_) {
+		final var enclosingType = currentClassType;
+		currentClassType = ClassType.CLASS;
+
 		declare(class_.name());
 		define(class_.name());
 
@@ -244,6 +248,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		}
 
 		endScope();
+
+		currentClassType = enclosingType;
 
 		return null;
 	}
@@ -265,6 +271,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 	@Override
 	public Void visitThis(Expression.This this_) {
+		if (ClassType.NONE.equals(currentClassType)) {
+			lox.error(this_.keyword(), "Can't use 'this' outside of a class.");
+		}
+
 		resolveLocal(this_, this_.keyword());
 
 		return null;
@@ -275,6 +285,13 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 		NONE,
 		FUNCTION,
 		METHOD,
+
+	}
+
+	public enum ClassType {
+
+		NONE,
+		CLASS,
 
 	}
 
